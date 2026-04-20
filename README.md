@@ -81,4 +81,4 @@ This rewards players who think beyond the first country that comes to mind.
 
 ## 🙏 Inspiration
 
-Inspired by [GeoRiddle](https://georiddle.org/) and the broader genre of grid-based trivia games.
+Inspired by [GeoRiddle](https://georiddle.org/) and the broader genre of grid-based trivia games.  
