@@ -79,18 +79,6 @@ This rewards players who think beyond the first country that comes to mind.
 
 ---
 
-## 📸 Screenshot
-
-> *(Add a screenshot of your game here by dragging an image into GitHub)*
-
----
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
----
-
 ## 🙏 Inspiration
 
 Inspired by [GeoRiddle](https://georiddle.org/) and the broader genre of grid-based trivia games.
