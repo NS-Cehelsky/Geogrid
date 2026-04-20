@@ -2,7 +2,7 @@
 
 A daily-style geography puzzle game inspired by grid-based trivia games. Fill a 3×3 grid with countries that satisfy both the row and column category for each cell — and score points based on how obscure your picks are.
 
-**[▶ Play it live](https://YOUR-USERNAME.github.io/geogrid/)**
+**[▶ Play it live](https://ns-cehelsky.github.io/Geogrid/)**
 
 ---
 
