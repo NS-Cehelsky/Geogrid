@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GeoGrid – Geography Puzzle Game</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#fff;--bg2:#f7f6f2;--bg3:#efeee9;--text:#1a1a19;--text2:#6b6b63;--border:rgba(0,0,0,.09);--border2:rgba(0,0,0,.18);--accent:#4f7fd4;--correct:#1a9e75;--wrong:#c0392b;--wrong-bg:#fdf0ee;--r:14px;--rlg:20px;--sh:0 2px 12px rgba(0,0,0,.07);--shlg:0 4px 24px rgba(0,0,0,.10)}
+  @media(prefers-color-scheme:dark){:root{--bg:#1c1c1a;--bg2:#252523;--bg3:#2e2e2b;--text:#f0efe9;--text2:#97978f;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.16);--accent:#6b9ce8;--correct:#1db882;--wrong:#e07070;--wrong-bg:#2e1a1a;--sh:0 2px 12px rgba(0,0,0,.3);--shlg:0 4px 24px rgba(0,0,0,.4)}}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#e8edf7,#ece9f0 50%,#e9ede8);min-height:100vh;padding:1.5rem 1rem}
+  @media(prefers-color-scheme:dark){body{background:linear-gradient(135deg,#1a1c24,#1e1c22 50%,#1a1e1a)}}
+  #app{max-width:640px;margin:0 auto;background:var(--bg);border-radius:var(--rlg);padding:1.5rem;box-shadow:var(--shlg);border:.5px solid var(--border)}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.3rem}
+  .logo{display:flex;align-items:center;gap:10px}
+  .logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#4f7fd4,#7f5fc8);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 8px rgba(79,127,212,.35)}
+  h1{font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+  .gbadge{font-size:12px;color:var(--text2);background:var(--bg2);padding:5px 12px;border-radius:20px;border:.5px solid var(--border);font-weight:500}
+  .subtitle{font-size:13px;color:var(--text2);margin-bottom:1rem;line-height:1.5}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.1rem}
+  .stat{border-radius:var(--r);padding:11px 10px;text-align:center;border:.5px solid var(--border)}
+  .stat:nth-child(1){background:linear-gradient(135deg,#eef4ff,#e6eeff)}
+  .stat:nth-child(2){background:linear-gradient(135deg,#edfaf4,#e4f6ef)}
+  .stat:nth-child(3){background:linear-gradient(135deg,#fff4ec,#ffeee2)}
+  @media(prefers-color-scheme:dark){.stat:nth-child(1){background:linear-gradient(135deg,#1e2535,#1a2030)}.stat:nth-child(2){background:linear-gradient(135deg,#1a2e27,#182923)}.stat:nth-child(3){background:linear-gradient(135deg,#2e2218,#281d14)}}
+  .sv{font-size:26px;font-weight:700;color:var(--text)}.sl{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;margin-top:2px;font-weight:600}
+  .grid{display:grid;grid-template-columns:105px repeat(3,1fr);gap:6px}
+  .corner{background:transparent}
+  .clabel{border-radius:var(--r);padding:9px 7px;font-size:11px;font-weight:700;text-align:center;display:flex;align-items:center;justify-content:center;line-height:1.4;min-height:54px;border:.5px solid var(--border)}
+  .ccol{background:linear-gradient(160deg,#eef2ff,#e8ecfa);color:#3a5ab8}
+  .rlabel{border-radius:var(--r);padding:9px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.4;min-height:90px;border:.5px solid var(--border);background:linear-gradient(160deg,#f0faf6,#e6f5ef);color:#1e7a58}
+  @media(prefers-color-scheme:dark){.ccol{background:linear-gradient(160deg,#1e2535,#1a2030);color:#7aa0e8}.rlabel{background:linear-gradient(160deg,#1a2e27,#182923);color:#3ecf96}}
+  .cell{background:var(--bg);border:.5px solid var(--border);border-radius:var(--r);min-height:90px;display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;transition:transform .12s,box-shadow .12s,background .15s;padding:8px;box-shadow:var(--sh)}
+  .cell:hover:not(.filled):not(.locked){background:var(--bg2);border-color:var(--border2);transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.11)}
+  .cell.selected{border:2px solid var(--accent);background:linear-gradient(135deg,#f0f5ff,#eaf0ff);transform:translateY(-1px);box-shadow:0 4px 16px rgba(79,127,212,.2)}
+  @media(prefers-color-scheme:dark){.cell.selected{background:linear-gradient(135deg,#1e2535,#1a2030)}}
+  .cell.filled{cursor:default;background:linear-gradient(135deg,#f5fbf8,#edf8f3);border-color:rgba(26,158,117,.2)}
+  @media(prefers-color-scheme:dark){.cell.filled{background:linear-gradient(135deg,#1a2e27,#182923)}}
+  .cell.wrong{background:var(--wrong-bg)!important;border-color:var(--wrong)!important;animation:shake .35s ease}
+  .cell.locked{cursor:default;opacity:.75}
+  .cflag{font-size:24px;margin-bottom:3px;line-height:1}.cname{font-size:11px;font-weight:600;color:var(--text);text-align:center;line-height:1.3}.cpts{font-size:16px;font-weight:700;color:var(--correct);margin-top:3px}.cplus{font-size:28px;color:var(--border2);line-height:1;transition:color .15s}
+  .cell:hover .cplus{color:var(--accent)}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}60%{transform:translateX(5px)}}
+  @keyframes popIn{0%{transform:scale(.82);opacity:0}65%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+  .cell.pop{animation:popIn .3s ease forwards}
+  .iarea{margin-top:1rem;display:none;background:linear-gradient(135deg,#f7f9ff,#f3f5fd);border:.5px solid rgba(79,127,212,.2);border-radius:var(--rlg);padding:1rem;box-shadow:0 2px 12px rgba(79,127,212,.08)}
+  @media(prefers-color-scheme:dark){.iarea{background:linear-gradient(135deg,#1e2535,#1a2030);border-color:rgba(107,156,232,.2)}}
+  .iarea.visible{display:block}
+  .hint{font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6}.hint strong{color:var(--accent)}
+  .swrap{display:flex;gap:8px;margin-bottom:10px}
+  #search{flex:1;font-size:14px;padding:10px 14px;border:.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s}
+  #search:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,127,212,.15)}
+  .cbtn{padding:10px 14px;font-size:13px;border:.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text2);cursor:pointer;transition:background .15s;white-space:nowrap;font-weight:500}
+  .cbtn:hover{background:var(--bg3)}
+  .suggs{display:flex;flex-wrap:wrap;gap:6px;max-height:155px;overflow-y:auto}
+  .sug{padding:5px 12px;border:.5px solid var(--border);border-radius:20px;font-size:12px;cursor:pointer;background:var(--bg);color:var(--text);transition:background .12s,border-color .12s,transform .1s;font-weight:500}
+  .sug:hover{background:linear-gradient(135deg,#eef4ff,#e8ecfa);border-color:var(--accent);transform:translateY(-1px);color:var(--accent)}
+  @media(prefers-color-scheme:dark){.sug:hover{background:linear-gradient(135deg,#1e2535,#1a2030)}}
+  .msg{margin-top:10px;font-size:13px;min-height:18px;color:var(--text2);font-weight:500}.msg.ok{color:var(--correct)}.msg.err{color:var(--wrong)}
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;padding:1rem}
+  .overlay.visible{display:flex}
+  .modal{background:var(--bg);border-radius:var(--rlg);padding:2rem 1.5rem;max-width:360px;width:100%;text-align:center;box-shadow:var(--shlg);border:.5px solid var(--border)}
+  .micon{font-size:44px;margin-bottom:.5rem}.modal h2{font-size:22px;font-weight:700;margin-bottom:.4rem;letter-spacing:-.3px}
+  .mscore{font-size:52px;font-weight:800;background:linear-gradient(135deg,var(--accent),#7f5fc8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:.4rem 0}
+  .modal p{font-size:14px;color:var(--text2);margin-bottom:1.25rem;line-height:1.6}
+  .macts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .mbtn{padding:11px 22px;border:.5px solid var(--border2);border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;background:var(--bg2);color:var(--text);transition:background .15s,transform .1s}
+  .mbtn:hover{background:var(--bg3);transform:translateY(-1px)}
+  .mbtn.pri{background:linear-gradient(135deg,#4f7fd4,#6b6fd4);color:#fff;border:none;box-shadow:0 3px 12px rgba(79,127,212,.35)}
+  .mbtn.pri:hover{background:linear-gradient(135deg,#3d6fc4,#5a6fc4)}
+  footer{text-align:center;margin-top:1.1rem;font-size:12px;color:var(--text2)}
+  footer a{color:var(--accent);text-decoration:none;font-weight:500}
+  footer a:hover{text-decoration:underline}
+  @media(max-width:500px){#app{padding:1rem}.grid{grid-template-columns:85px repeat(3,1fr);gap:4px}.rlabel,.cell{min-height:78px}.clabel{min-height:46px;font-size:10px}h1{font-size:19px}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo"><div class="logo-icon">🌍</div><h1>GeoGrid</h1></div>
+    <span class="gbadge" id="gbadge">12 guesses left</span>
+  </header>
+  <p class="subtitle">Fill each cell with a country matching <strong>both</strong> the row &amp; column. Rarer picks = more points!</p>
+  <div class="stats">
+    <div class="stat"><div class="sv" id="score-val">0</div><div class="sl">Score</div></div>
+    <div class="stat"><div class="sv" id="filled-val">0/9</div><div class="sl">Filled</div></div>
+    <div class="stat"><div class="sv" id="guesses-val">12</div><div class="sl">Guesses</div></div>
+  </div>
+  <div class="grid" id="main-grid"></div>
+  <div class="iarea" id="iarea">
+    <div class="hint" id="hint"></div>
+    <div class="swrap">
+      <input type="text" id="search" placeholder="Type a country name..." autocomplete="off" spellcheck="false" />
+      <button class="cbtn" onclick="cancelSelect()">Cancel</button>
+    </div>
+    <div class="suggs" id="suggs"></div>
+    <div class="msg" id="msg"></div>
+  </div>
+  <footer>Click a cell to start &nbsp;·&nbsp; <a href="#" onclick="showHelp();return false;">How to play</a> &nbsp;·&nbsp; <a href="#" onclick="newGame();return false;">New game</a></footer>
+</div>
+
+<div class="overlay" id="end-overlay">
+  <div class="modal">
+    <div class="micon" id="micon"></div>
+    <h2 id="mtitle"></h2>
+    <div class="mscore" id="mscore"></div>
+    <p id="mbody"></p>
+    <div class="macts">
+      <button class="mbtn pri" onclick="newGame()">New Game</button>
+      <button class="mbtn" onclick="document.getElementById('end-overlay').classList.remove('visible')">View Board</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="help-overlay" onclick="this.classList.remove('visible')">
+  <div class="modal" onclick="event.stopPropagation()" style="text-align:left">
+    <h2 style="margin-bottom:1rem">How to play</h2>
+    <p>Fill all <strong>9 cells</strong> with countries satisfying <strong>both</strong> the row and column category.</p>
+    <p style="margin-top:.75rem">You have <strong>12 guesses</strong> total — wrong guesses count too. Each country can only be used once.</p>
+    <p style="margin-top:.75rem"><strong>Scoring:</strong> 5–100 pts per cell. Smaller, less obvious countries score more!</p>
+    <div class="macts" style="margin-top:1.25rem">
+      <button class="mbtn pri" onclick="document.getElementById('help-overlay').classList.remove('visible')">Got it!</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const C=[
+  {n:"France",r:"Western Europe",co:"Europe",i:false,ll:false,p:68e6,f:"🇫🇷",cl:["blue","white","red"]},
+  {n:"Germany",r:"Western Europe",co:"Europe",i:false,ll:false,p:83e6,f:"🇩🇪",cl:["black","red","gold"]},
+  {n:"Netherlands",r:"Western Europe",co:"Europe",i:false,ll:false,p:17e6,f:"🇳🇱",cl:["red","white","blue"]},
+  {n:"Belgium",r:"Western Europe",co:"Europe",i:false,ll:false,p:11.5e6,f:"🇧🇪",cl:["black","yellow","red"]},
+  {n:"Luxembourg",r:"Western Europe",co:"Europe",i:false,ll:true,p:660e3,f:"🇱🇺",cl:["red","white","blue"]},
+  {n:"Switzerland",r:"Western Europe",co:"Europe",i:false,ll:true,p:8.6e6,f:"🇨🇭",cl:["red","white"]},
+  {n:"Austria",r:"Western Europe",co:"Europe",i:false,ll:true,p:9e6,f:"🇦🇹",cl:["red","white"]},
+  {n:"Liechtenstein",r:"Western Europe",co:"Europe",i:false,ll:true,p:38e3,f:"🇱🇮",cl:["blue","red","gold"]},
+  {n:"Italy",r:"Southern Europe",co:"Europe",i:false,ll:false,p:60e6,f:"🇮🇹",cl:["green","white","red"]},
+  {n:"Spain",r:"Southern Europe",co:"Europe",i:false,ll:false,p:47e6,f:"🇪🇸",cl:["red","yellow"]},
+  {n:"Portugal",r:"Southern Europe",co:"Europe",i:false,ll:false,p:10e6,f:"🇵🇹",cl:["green","red","yellow"]},
+  {n:"Greece",r:"Southern Europe",co:"Europe",i:false,ll:false,p:10e6,f:"🇬🇷",cl:["blue","white"]},
+  {n:"Croatia",r:"Southern Europe",co:"Europe",i:false,ll:false,p:4e6,f:"🇭🇷",cl:["red","white","blue"]},
+  {n:"Slovenia",r:"Southern Europe",co:"Europe",i:false,ll:false,p:2.1e6,f:"🇸🇮",cl:["white","blue","red"]},
+  {n:"Albania",r:"Southern Europe",co:"Europe",i:false,ll:false,p:2.8e6,f:"🇦🇱",cl:["red","black"]},
+  {n:"Serbia",r:"Southern Europe",co:"Europe",i:false,ll:true,p:7e6,f:"🇷🇸",cl:["red","blue","white"]},
+  {n:"North Macedonia",r:"Southern Europe",co:"Europe",i:false,ll:true,p:2.1e6,f:"🇲🇰",cl:["red","yellow"]},
+  {n:"Malta",r:"Southern Europe",co:"Europe",i:true,ll:false,p:525e3,f:"🇲🇹",cl:["white","red"]},
+  {n:"Cyprus",r:"Southern Europe",co:"Europe",i:true,ll:false,p:1.2e6,f:"🇨🇾",cl:["white","orange","green"]},
+  {n:"Sweden",r:"Scandinavia",co:"Europe",i:false,ll:false,p:10e6,f:"🇸🇪",cl:["blue","yellow"]},
+  {n:"Norway",r:"Scandinavia",co:"Europe",i:false,ll:false,p:5.4e6,f:"🇳🇴",cl:["red","white","blue"]},
+  {n:"Finland",r:"Scandinavia",co:"Europe",i:false,ll:false,p:5.5e6,f:"🇫🇮",cl:["white","blue"]},
+  {n:"Denmark",r:"Scandinavia",co:"Europe",i:false,ll:false,p:5.9e6,f:"🇩🇰",cl:["red","white"]},
+  {n:"Iceland",r:"Scandinavia",co:"Europe",i:true,ll:false,p:370e3,f:"🇮🇸",cl:["blue","white","red"]},
+  {n:"Poland",r:"Eastern Europe",co:"Europe",i:false,ll:false,p:38e6,f:"🇵🇱",cl:["white","red"]},
+  {n:"Romania",r:"Eastern Europe",co:"Europe",i:false,ll:false,p:19e6,f:"🇷🇴",cl:["blue","yellow","red"]},
+  {n:"Ukraine",r:"Eastern Europe",co:"Europe",i:false,ll:false,p:44e6,f:"🇺🇦",cl:["blue","yellow"]},
+  {n:"Bulgaria",r:"Eastern Europe",co:"Europe",i:false,ll:false,p:6.5e6,f:"🇧🇬",cl:["white","green","red"]},
+  {n:"Hungary",r:"Eastern Europe",co:"Europe",i:false,ll:true,p:9.7e6,f:"🇭🇺",cl:["red","white","green"]},
+  {n:"Czech Republic",r:"Eastern Europe",co:"Europe",i:false,ll:true,p:10.7e6,f:"🇨🇿",cl:["white","red","blue"]},
+  {n:"Slovakia",r:"Eastern Europe",co:"Europe",i:false,ll:true,p:5.5e6,f:"🇸🇰",cl:["white","blue","red"]},
+  {n:"Moldova",r:"Eastern Europe",co:"Europe",i:false,ll:true,p:2.6e6,f:"🇲🇩",cl:["blue","yellow","red"]},
+  {n:"Belarus",r:"Eastern Europe",co:"Europe",i:false,ll:true,p:9.4e6,f:"🇧🇾",cl:["red","green","white"]},
+  {n:"United Kingdom",r:"British Isles",co:"Europe",i:true,ll:false,p:67e6,f:"🇬🇧",cl:["blue","red","white"]},
+  {n:"Ireland",r:"British Isles",co:"Europe",i:true,ll:false,p:5e6,f:"🇮🇪",cl:["green","white","orange"]},
+  {n:"Japan",r:"East Asia",co:"Asia",i:true,ll:false,p:125e6,f:"🇯🇵",cl:["white","red"]},
+  {n:"China",r:"East Asia",co:"Asia",i:false,ll:false,p:1400e6,f:"🇨🇳",cl:["red","yellow"]},
+  {n:"South Korea",r:"East Asia",co:"Asia",i:false,ll:false,p:52e6,f:"🇰🇷",cl:["white","red","blue","black"]},
+  {n:"North Korea",r:"East Asia",co:"Asia",i:false,ll:false,p:25e6,f:"🇰🇵",cl:["red","white","blue"]},
+  {n:"Mongolia",r:"East Asia",co:"Asia",i:false,ll:true,p:3.3e6,f:"🇲🇳",cl:["red","blue","yellow"]},
+  {n:"Indonesia",r:"Southeast Asia",co:"Asia",i:true,ll:false,p:270e6,f:"🇮🇩",cl:["red","white"]},
+  {n:"Philippines",r:"Southeast Asia",co:"Asia",i:true,ll:false,p:110e6,f:"🇵🇭",cl:["blue","red","white","yellow"]},
+  {n:"Thailand",r:"Southeast Asia",co:"Asia",i:false,ll:false,p:70e6,f:"🇹🇭",cl:["red","white","blue"]},
+  {n:"Vietnam",r:"Southeast Asia",co:"Asia",i:false,ll:false,p:97e6,f:"🇻🇳",cl:["red","yellow"]},
+  {n:"Malaysia",r:"Southeast Asia",co:"Asia",i:false,ll:false,p:32e6,f:"🇲🇾",cl:["red","white","blue","yellow"]},
+  {n:"Myanmar",r:"Southeast Asia",co:"Asia",i:false,ll:false,p:54e6,f:"🇲🇲",cl:["yellow","green","red","white"]},
+  {n:"Cambodia",r:"Southeast Asia",co:"Asia",i:false,ll:false,p:16e6,f:"🇰🇭",cl:["red","blue","white"]},
+  {n:"Singapore",r:"Southeast Asia",co:"Asia",i:true,ll:false,p:5.8e6,f:"🇸🇬",cl:["red","white"]},
+  {n:"Laos",r:"Southeast Asia",co:"Asia",i:false,ll:true,p:7e6,f:"🇱🇦",cl:["red","blue","white"]},
+  {n:"Timor-Leste",r:"Southeast Asia",co:"Asia",i:true,ll:false,p:1.3e6,f:"🇹🇱",cl:["red","black","yellow","white"]},
+  {n:"India",r:"South Asia",co:"Asia",i:false,ll:false,p:1380e6,f:"🇮🇳",cl:["orange","white","green","blue"]},
+  {n:"Pakistan",r:"South Asia",co:"Asia",i:false,ll:false,p:220e6,f:"🇵🇰",cl:["green","white"]},
+  {n:"Bangladesh",r:"South Asia",co:"Asia",i:false,ll:false,p:165e6,f:"🇧🇩",cl:["green","red"]},
+  {n:"Sri Lanka",r:"South Asia",co:"Asia",i:true,ll:false,p:21e6,f:"🇱🇰",cl:["maroon","orange","green","yellow"]},
+  {n:"Nepal",r:"South Asia",co:"Asia",i:false,ll:true,p:29e6,f:"🇳🇵",cl:["red","blue","white"]},
+  {n:"Maldives",r:"South Asia",co:"Asia",i:true,ll:false,p:540e3,f:"🇲🇻",cl:["red","green","white"]},
+  {n:"Bhutan",r:"South Asia",co:"Asia",i:false,ll:true,p:780e3,f:"🇧🇹",cl:["orange","red","yellow","white"]},
+  {n:"Kazakhstan",r:"Central Asia",co:"Asia",i:false,ll:true,p:19e6,f:"🇰🇿",cl:["blue","yellow"]},
+  {n:"Uzbekistan",r:"Central Asia",co:"Asia",i:false,ll:true,p:34e6,f:"🇺🇿",cl:["blue","white","green"]},
+  {n:"Kyrgyzstan",r:"Central Asia",co:"Asia",i:false,ll:true,p:6.5e6,f:"🇰🇬",cl:["red","yellow"]},
+  {n:"Tajikistan",r:"Central Asia",co:"Asia",i:false,ll:true,p:9.5e6,f:"🇹🇯",cl:["red","white","green"]},
+  {n:"Turkmenistan",r:"Central Asia",co:"Asia",i:false,ll:true,p:6e6,f:"🇹🇲",cl:["green","white","red"]},
+  {n:"Afghanistan",r:"Central Asia",co:"Asia",i:false,ll:true,p:38e6,f:"🇦🇫",cl:["black","red","green","white"]},
+  {n:"Saudi Arabia",r:"Middle East",co:"Asia",i:false,ll:false,p:35e6,f:"🇸🇦",cl:["green","white"]},
+  {n:"Iran",r:"Middle East",co:"Asia",i:false,ll:false,p:84e6,f:"🇮🇷",cl:["green","white","red"]},
+  {n:"Iraq",r:"Middle East",co:"Asia",i:false,ll:false,p:40e6,f:"🇮🇶",cl:["red","white","black","green"]},
+  {n:"Turkey",r:"Middle East",co:"Asia",i:false,ll:false,p:84e6,f:"🇹🇷",cl:["red","white"]},
+  {n:"Israel",r:"Middle East",co:"Asia",i:false,ll:false,p:9e6,f:"🇮🇱",cl:["white","blue"]},
+  {n:"Jordan",r:"Middle East",co:"Asia",i:false,ll:false,p:10e6,f:"🇯🇴",cl:["black","white","green","red"]},
+  {n:"Lebanon",r:"Middle East",co:"Asia",i:false,ll:false,p:5.2e6,f:"🇱🇧",cl:["red","white","green"]},
+  {n:"UAE",r:"Middle East",co:"Asia",i:false,ll:false,p:9.9e6,f:"🇦🇪",cl:["red","green","white","black"]},
+  {n:"Qatar",r:"Middle East",co:"Asia",i:false,ll:false,p:2.8e6,f:"🇶🇦",cl:["maroon","white"]},
+  {n:"Kuwait",r:"Middle East",co:"Asia",i:false,ll:false,p:4.3e6,f:"🇰🇼",cl:["green","white","red","black"]},
+  {n:"Oman",r:"Middle East",co:"Asia",i:false,ll:false,p:4.5e6,f:"🇴🇲",cl:["red","white","green"]},
+  {n:"Yemen",r:"Middle East",co:"Asia",i:false,ll:false,p:33e6,f:"🇾🇪",cl:["red","white","black"]},
+  {n:"Brazil",r:"South America",co:"South America",i:false,ll:false,p:213e6,f:"🇧🇷",cl:["green","yellow","blue","white"]},
+  {n:"Argentina",r:"South America",co:"South America",i:false,ll:false,p:45e6,f:"🇦🇷",cl:["blue","white","yellow"]},
+  {n:"Colombia",r:"South America",co:"South America",i:false,ll:false,p:51e6,f:"🇨🇴",cl:["yellow","blue","red"]},
+  {n:"Peru",r:"South America",co:"South America",i:false,ll:false,p:33e6,f:"🇵🇪",cl:["red","white"]},
+  {n:"Chile",r:"South America",co:"South America",i:false,ll:false,p:19e6,f:"🇨🇱",cl:["red","white","blue","yellow"]},
+  {n:"Venezuela",r:"South America",co:"South America",i:false,ll:false,p:28e6,f:"🇻🇪",cl:["yellow","blue","red"]},
+  {n:"Ecuador",r:"South America",co:"South America",i:false,ll:false,p:18e6,f:"🇪🇨",cl:["yellow","blue","red"]},
+  {n:"Uruguay",r:"South America",co:"South America",i:false,ll:false,p:3.5e6,f:"🇺🇾",cl:["white","blue","yellow"]},
+  {n:"Guyana",r:"South America",co:"South America",i:false,ll:false,p:790e3,f:"🇬🇾",cl:["green","yellow","red","white","black"]},
+  {n:"Suriname",r:"South America",co:"South America",i:false,ll:false,p:590e3,f:"🇸🇷",cl:["green","white","red","yellow"]},
+  {n:"Bolivia",r:"South America",co:"South America",i:false,ll:true,p:12e6,f:"🇧🇴",cl:["red","yellow","green"]},
+  {n:"Paraguay",r:"South America",co:"South America",i:false,ll:true,p:7.3e6,f:"🇵🇾",cl:["red","white","blue"]},
+  {n:"Cuba",r:"Caribbean",co:"North America",i:true,ll:false,p:11e6,f:"🇨🇺",cl:["blue","white","red"]},
+  {n:"Jamaica",r:"Caribbean",co:"North America",i:true,ll:false,p:2.96e6,f:"🇯🇲",cl:["black","green","yellow"]},
+  {n:"Haiti",r:"Caribbean",co:"North America",i:true,ll:false,p:11e6,f:"🇭🇹",cl:["blue","red"]},
+  {n:"Dominican Republic",r:"Caribbean",co:"North America",i:true,ll:false,p:10.8e6,f:"🇩🇴",cl:["blue","red","white"]},
+  {n:"Trinidad and Tobago",r:"Caribbean",co:"North America",i:true,ll:false,p:1.4e6,f:"🇹🇹",cl:["red","white","black"]},
+  {n:"Bahamas",r:"Caribbean",co:"North America",i:true,ll:false,p:390e3,f:"🇧🇸",cl:["blue","black","yellow"]},
+  {n:"Barbados",r:"Caribbean",co:"North America",i:true,ll:false,p:287e3,f:"🇧🇧",cl:["blue","yellow","black"]},
+  {n:"Saint Lucia",r:"Caribbean",co:"North America",i:true,ll:false,p:184e3,f:"🇱🇨",cl:["blue","white","yellow","black"]},
+  {n:"Mexico",r:"Central America",co:"North America",i:false,ll:false,p:128e6,f:"🇲🇽",cl:["green","white","red"]},
+  {n:"Guatemala",r:"Central America",co:"North America",i:false,ll:false,p:17e6,f:"🇬🇹",cl:["blue","white"]},
+  {n:"Honduras",r:"Central America",co:"North America",i:false,ll:false,p:10e6,f:"🇭🇳",cl:["blue","white"]},
+  {n:"El Salvador",r:"Central America",co:"North America",i:false,ll:false,p:6.5e6,f:"🇸🇻",cl:["blue","white"]},
+  {n:"Nicaragua",r:"Central America",co:"North America",i:false,ll:false,p:6.6e6,f:"🇳🇮",cl:["blue","white","yellow"]},
+  {n:"Costa Rica",r:"Central America",co:"North America",i:false,ll:false,p:5.1e6,f:"🇨🇷",cl:["blue","white","red"]},
+  {n:"Panama",r:"Central America",co:"North America",i:false,ll:false,p:4.3e6,f:"🇵🇦",cl:["red","white","blue"]},
+  {n:"United States",r:"North America",co:"North America",i:false,ll:false,p:331e6,f:"🇺🇸",cl:["red","white","blue"]},
+  {n:"Canada",r:"North America",co:"North America",i:false,ll:false,p:38e6,f:"🇨🇦",cl:["red","white"]},
+  {n:"Egypt",r:"North Africa",co:"Africa",i:false,ll:false,p:102e6,f:"🇪🇬",cl:["red","white","black"]},
+  {n:"Morocco",r:"North Africa",co:"Africa",i:false,ll:false,p:37e6,f:"🇲🇦",cl:["red","green"]},
+  {n:"Algeria",r:"North Africa",co:"Africa",i:false,ll:false,p:44e6,f:"🇩🇿",cl:["green","white","red"]},
+  {n:"Tunisia",r:"North Africa",co:"Africa",i:false,ll:false,p:12e6,f:"🇹🇳",cl:["red","white"]},
+  {n:"Libya",r:"North Africa",co:"Africa",i:false,ll:false,p:7e6,f:"🇱🇾",cl:["black","red","green","white"]},
+  {n:"Sudan",r:"North Africa",co:"Africa",i:false,ll:false,p:45e6,f:"🇸🇩",cl:["red","white","black","green"]},
+  {n:"Nigeria",r:"West Africa",co:"Africa",i:false,ll:false,p:211e6,f:"🇳🇬",cl:["green","white"]},
+  {n:"Ghana",r:"West Africa",co:"Africa",i:false,ll:false,p:32e6,f:"🇬🇭",cl:["red","yellow","green","black"]},
+  {n:"Senegal",r:"West Africa",co:"Africa",i:false,ll:false,p:17e6,f:"🇸🇳",cl:["green","yellow","red"]},
+  {n:"Cameroon",r:"West Africa",co:"Africa",i:false,ll:false,p:27e6,f:"🇨🇲",cl:["green","red","yellow"]},
+  {n:"Ivory Coast",r:"West Africa",co:"Africa",i:false,ll:false,p:26e6,f:"🇨🇮",cl:["orange","white","green"]},
+  {n:"Mali",r:"West Africa",co:"Africa",i:false,ll:true,p:22e6,f:"🇲🇱",cl:["green","yellow","red"]},
+  {n:"Burkina Faso",r:"West Africa",co:"Africa",i:false,ll:true,p:22e6,f:"🇧🇫",cl:["red","green","yellow"]},
+  {n:"Niger",r:"West Africa",co:"Africa",i:false,ll:true,p:24e6,f:"🇳🇪",cl:["orange","white","green"]},
+  {n:"Cape Verde",r:"West Africa",co:"Africa",i:true,ll:false,p:560e3,f:"🇨🇻",cl:["blue","white","red","yellow"]},
+  {n:"Ethiopia",r:"East Africa",co:"Africa",i:false,ll:true,p:120e6,f:"🇪🇹",cl:["green","yellow","red","blue"]},
+  {n:"Tanzania",r:"East Africa",co:"Africa",i:false,ll:false,p:61e6,f:"🇹🇿",cl:["green","black","yellow","blue"]},
+  {n:"Kenya",r:"East Africa",co:"Africa",i:false,ll:false,p:54e6,f:"🇰🇪",cl:["black","red","green","white"]},
+  {n:"Uganda",r:"East Africa",co:"Africa",i:false,ll:true,p:47e6,f:"🇺🇬",cl:["black","yellow","red","white"]},
+  {n:"Rwanda",r:"East Africa",co:"Africa",i:false,ll:true,p:13e6,f:"🇷🇼",cl:["blue","yellow","green"]},
+  {n:"Somalia",r:"East Africa",co:"Africa",i:false,ll:false,p:16e6,f:"🇸🇴",cl:["blue","white"]},
+  {n:"Madagascar",r:"East Africa",co:"Africa",i:true,ll:false,p:28e6,f:"🇲🇬",cl:["white","red","green"]},
+  {n:"South Africa",r:"Southern Africa",co:"Africa",i:false,ll:false,p:60e6,f:"🇿🇦",cl:["green","black","yellow","red","white","blue"]},
+  {n:"DR Congo",r:"Southern Africa",co:"Africa",i:false,ll:false,p:90e6,f:"🇨🇩",cl:["blue","red","yellow"]},
+  {n:"Angola",r:"Southern Africa",co:"Africa",i:false,ll:false,p:33e6,f:"🇦🇴",cl:["red","black","yellow"]},
+  {n:"Mozambique",r:"Southern Africa",co:"Africa",i:false,ll:false,p:32e6,f:"🇲🇿",cl:["green","yellow","black","red","white"]},
+  {n:"Zambia",r:"Southern Africa",co:"Africa",i:false,ll:true,p:19e6,f:"🇿🇲",cl:["green","red","black","orange"]},
+  {n:"Zimbabwe",r:"Southern Africa",co:"Africa",i:false,ll:true,p:15e6,f:"🇿🇼",cl:["green","yellow","red","black","white"]},
+  {n:"Botswana",r:"Southern Africa",co:"Africa",i:false,ll:true,p:2.6e6,f:"🇧🇼",cl:["blue","black","white"]},
+  {n:"Malawi",r:"Southern Africa",co:"Africa",i:false,ll:true,p:19e6,f:"🇲🇼",cl:["black","red","green","white"]},
+  {n:"Australia",r:"Oceania",co:"Oceania",i:true,ll:false,p:25e6,f:"🇦🇺",cl:["blue","red","white"]},
+  {n:"New Zealand",r:"Oceania",co:"Oceania",i:true,ll:false,p:5e6,f:"🇳🇿",cl:["blue","red","white"]},
+  {n:"Papua New Guinea",r:"Oceania",co:"Oceania",i:true,ll:false,p:9e6,f:"🇵🇬",cl:["black","red","yellow","white"]},
+  {n:"Fiji",r:"Oceania",co:"Oceania",i:true,ll:false,p:930e3,f:"🇫🇯",cl:["blue","white","red","yellow"]},
+  {n:"Vanuatu",r:"Oceania",co:"Oceania",i:true,ll:false,p:307e3,f:"🇻🇺",cl:["black","red","green","yellow"]},
+  {n:"Samoa",r:"Oceania",co:"Oceania",i:true,ll:false,p:220e3,f:"🇼🇸",cl:["red","white","blue"]},
+  {n:"Tonga",r:"Oceania",co:"Oceania",i:true,ll:false,p:100e3,f:"🇹🇴",cl:["red","white"]},
+  {n:"Kiribati",r:"Oceania",co:"Oceania",i:true,ll:false,p:120e3,f:"🇰🇮",cl:["red","white","blue","yellow"]},
+  {n:"Palau",r:"Oceania",co:"Oceania",i:true,ll:false,p:18e3,f:"🇵🇼",cl:["blue","yellow"]},
+];
+
+const CATS=[
+  {id:"europe",   lb:"In Europe",           t:c=>c.co==="Europe"},
+  {id:"asia",     lb:"In Asia",             t:c=>c.co==="Asia"},
+  {id:"africa",   lb:"In Africa",           t:c=>c.co==="Africa"},
+  {id:"sam",      lb:"In South America",    t:c=>c.co==="South America"},
+  {id:"nam",      lb:"In North America",    t:c=>c.co==="North America"},
+  {id:"oceania",  lb:"In Oceania",          t:c=>c.co==="Oceania"},
+  {id:"scand",    lb:"In Scandinavia",      t:c=>c.r==="Scandinavia"},
+  {id:"weur",     lb:"In Western Europe",   t:c=>c.r==="Western Europe"},
+  {id:"seur",     lb:"In Southern Europe",  t:c=>c.r==="Southern Europe"},
+  {id:"eeur",     lb:"In Eastern Europe",   t:c=>c.r==="Eastern Europe"},
+  {id:"brit",     lb:"In the British Isles",t:c=>c.r==="British Isles"},
+  {id:"seas",     lb:"In Southeast Asia",   t:c=>c.r==="Southeast Asia"},
+  {id:"eas",      lb:"In East Asia",        t:c=>c.r==="East Asia"},
+  {id:"sas",      lb:"In South Asia",       t:c=>c.r==="South Asia"},
+  {id:"cas",      lb:"In Central Asia",     t:c=>c.r==="Central Asia"},
+  {id:"me",       lb:"In the Middle East",  t:c=>c.r==="Middle East"},
+  {id:"carib",    lb:"In the Caribbean",    t:c=>c.r==="Caribbean"},
+  {id:"cam",      lb:"In Central America",  t:c=>c.r==="Central America"},
+  {id:"nafrica",  lb:"In North Africa",     t:c=>c.r==="North Africa"},
+  {id:"wafrica",  lb:"In West Africa",      t:c=>c.r==="West Africa"},
+  {id:"eafrica",  lb:"In East Africa",      t:c=>c.r==="East Africa"},
+  {id:"safrica",  lb:"In Southern Africa",  t:c=>c.r==="Southern Africa"},
+  {id:"island",   lb:"Island nation",       t:c=>c.i},
+  {id:"ll",       lb:"Landlocked",          t:c=>c.ll},
+  {id:"coast",    lb:"Has a coastline",     t:c=>!c.i&&!c.ll},
+  {id:"p100",     lb:"Population 100M+",    t:c=>c.p>=100e6},
+  {id:"p1050",    lb:"Population 10M–50M",  t:c=>c.p>=10e6&&c.p<50e6},
+  {id:"p10",      lb:"Population under 10M",t:c=>c.p<10e6},
+  {id:"p1",       lb:"Population under 1M", t:c=>c.p<1e6},
+  {id:"fred",     lb:"Flag has red",        t:c=>c.cl.includes("red")||c.cl.includes("maroon")},
+  {id:"fblue",    lb:"Flag has blue",       t:c=>c.cl.includes("blue")},
+  {id:"fgreen",   lb:"Flag has green",      t:c=>c.cl.includes("green")},
+  {id:"fyellow",  lb:"Flag has yellow/gold",t:c=>c.cl.includes("yellow")||c.cl.includes("gold")||c.cl.includes("orange")},
+  {id:"fwhite",   lb:"Flag has white",      t:c=>c.cl.includes("white")},
+  {id:"fblack",   lb:"Flag has black",      t:c=>c.cl.includes("black")},
+  {id:"fnowhite", lb:"Flag has no white",   t:c=>!c.cl.includes("white")},
+];
+
+let board=null,sel=null;
+function valid(r,c){return C.filter(x=>r.t(x)&&c.t(x))}
+function genBoard(){
+  for(let t=0;t<300;t++){
+    let sh=[...CATS].sort(()=>Math.random()-.5);
+    let rows=sh.slice(0,3),cols=sh.slice(3,6),ok=true;
+    for(let r of rows){for(let c of cols){if(valid(r,c).length<2){ok=false;break}}if(!ok)break}
+    if(ok)return{rows,cols}
+  }return null
+}
+function score(country,list){
+  let s=[...list].sort((a,b)=>b.p-a.p),idx=s.findIndex(c=>c.n===country.n);
+  return idx<0?5:Math.round(5+95*(idx/Math.max(s.length-1,1)))
+}
+function initGame(){
+  let g=genBoard();if(!g){setTimeout(initGame,50);return}
+  board={rows:g.rows,cols:g.cols,cells:Array(9).fill(null).map(()=>({c:null})),gl:12,score:0,used:new Set(),over:false};
+  sel=null;
+  document.getElementById('iarea').classList.remove('visible');
+  document.getElementById('msg').textContent='';
+  render();stats();
+  document.getElementById('end-overlay').classList.remove('visible');
+}
+function el(t,c){let d=document.createElement(t);if(c)d.className=c;return d}
+function render(){
+  const g=document.getElementById('main-grid');g.innerHTML='';
+  g.appendChild(el('div','corner'));
+  for(let c of board.cols){let d=el('div','clabel ccol');d.textContent=c.lb;g.appendChild(d)}
+  for(let r=0;r<3;r++){
+    let rl=el('div','rlabel');rl.textContent=board.rows[r].lb;g.appendChild(rl);
+    for(let c=0;c<3;c++){
+      let idx=r*3+c,cell=board.cells[idx],d=el('div','cell');
+      if(cell&&cell.c){
+        d.classList.add('filled');
+        let f=el('div','cflag');f.textContent=cell.c.f;d.appendChild(f);
+        let n=el('div','cname');n.textContent=cell.c.n;d.appendChild(n);
+        let s=el('div','cpts');s.textContent=cell.pts+' pts';d.appendChild(s);
+      }else{
+        if(board.over)d.classList.add('locked');
+        if(sel===idx)d.classList.add('selected');
+        if(!board.over)d.onclick=()=>selectCell(idx);
+        let p=el('span','cplus');p.textContent='+';d.appendChild(p);
+      }
+      g.appendChild(d);
+    }
+  }
+}
+function stats(){
+  let f=board.cells.filter(c=>c&&c.c).length;
+  document.getElementById('score-val').textContent=board.score;
+  document.getElementById('filled-val').textContent=f+'/9';
+  document.getElementById('guesses-val').textContent=board.gl;
+  document.getElementById('gbadge').textContent=board.gl+' guesses left';
+}
+function selectCell(idx){
+  if(board.over||(board.cells[idx]&&board.cells[idx].c))return;
+  sel=idx;render();
+  let r=Math.floor(idx/3),c=idx%3;
+  document.getElementById('hint').innerHTML='Find a country: <strong>'+board.rows[r].lb+'</strong> AND <strong>'+board.cols[c].lb+'</strong>';
+  document.getElementById('iarea').classList.add('visible');
+  document.getElementById('search').value='';
+  document.getElementById('msg').textContent='';
+  showSuggs('');document.getElementById('search').focus();
+}
+function cancelSelect(){sel=null;render();document.getElementById('iarea').classList.remove('visible')}
+function showSuggs(q){
+  const box=document.getElementById('suggs');box.innerHTML='';
+  let low=q.toLowerCase();
+  let ms=C.filter(c=>!board.used.has(c.n)&&(c.n.toLowerCase().includes(low)||c.r.toLowerCase().includes(low)));
+  if(!q)ms=ms.slice(0,32);else ms=ms.slice(0,20);
+  for(let c of ms){let b=el('button','sug');b.textContent=c.f+' '+c.n;b.onclick=()=>guess(c);box.appendChild(b)}
+}
+document.getElementById('search').addEventListener('input',e=>showSuggs(e.target.value));
+document.getElementById('search').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){let q=e.target.value.toLowerCase().trim(),m=C.find(c=>c.n.toLowerCase()===q&&!board.used.has(c.n));if(m)guess(m)}
+});
+function guess(country){
+  if(sel===null||board.over)return;
+  let idx=sel,r=Math.floor(idx/3),c=idx%3,rc=board.rows[r],cc=board.cols[c];
+  board.gl--;
+  if(rc.t(country)&&cc.t(country)){
+    let pts=score(country,valid(rc,cc));
+    board.cells[idx]={c:country,pts};board.used.add(country.n);board.score+=pts;
+    document.getElementById('msg').className='msg ok';
+    document.getElementById('msg').textContent='✓ Correct! +'+pts+' points';
+    sel=null;document.getElementById('iarea').classList.remove('visible');
+    stats();render();
+    setTimeout(()=>{let fs=[...document.getElementById('main-grid').querySelectorAll('.cell.filled')];if(fs.length)fs[fs.length-1].classList.add('pop')},20);
+  }else{
+    document.getElementById('msg').className='msg err';
+    document.getElementById('msg').textContent='✗ '+country.n+' doesn\'t match both. Try again!';
+    stats();render();
+    setTimeout(()=>{
+      let fi=0;
+      for(let node of document.getElementById('main-grid').children){
+        if(node.classList.contains('cell')){if(fi===idx){node.classList.add('wrong');setTimeout(()=>node.classList.remove('wrong'),400);break}fi++}
+      }
+    },10);
+  }
+  let filled=board.cells.filter(c=>c&&c.c).length;
+  if(filled===9)setTimeout(()=>endGame(true),400);
+  else if(board.gl<=0)setTimeout(()=>endGame(false),400);
+}
+function endGame(won){
+  board.over=true;sel=null;
+  document.getElementById('iarea').classList.remove('visible');render();
+  setTimeout(()=>{
+    let f=board.cells.filter(c=>c&&c.c).length;
+    document.getElementById('micon').textContent=won?'🎉':'⏰';
+    document.getElementById('mtitle').textContent=won?'Puzzle Complete!':'Out of Guesses!';
+    document.getElementById('mscore').textContent=board.score+' pts';
+    document.getElementById('mbody').textContent='You filled '+f+'/9 cells. '+(won?'Amazing work!':'Better luck next time!');
+    document.getElementById('end-overlay').classList.add('visible');
+  },500);
+}
+function newGame(){initGame()}
+function showHelp(){document.getElementById('help-overlay').classList.add('visible')}
+initGame();
+</script>
+</body>
+</html>
