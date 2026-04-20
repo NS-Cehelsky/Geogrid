@@ -1,77 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>GeoGrid – Geography Puzzle Game</title>
 <style>
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  :root{--bg:#fff;--bg2:#f7f6f2;--bg3:#efeee9;--text:#1a1a19;--text2:#6b6b63;--border:rgba(0,0,0,.09);--border2:rgba(0,0,0,.18);--accent:#4f7fd4;--correct:#1a9e75;--wrong:#c0392b;--wrong-bg:#fdf0ee;--r:14px;--rlg:20px;--sh:0 2px 12px rgba(0,0,0,.07);--shlg:0 4px 24px rgba(0,0,0,.10)}
-  @media(prefers-color-scheme:dark){:root{--bg:#1c1c1a;--bg2:#252523;--bg3:#2e2e2b;--text:#f0efe9;--text2:#97978f;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.16);--accent:#6b9ce8;--correct:#1db882;--wrong:#e07070;--wrong-bg:#2e1a1a;--sh:0 2px 12px rgba(0,0,0,.3);--shlg:0 4px 24px rgba(0,0,0,.4)}}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#e8edf7,#ece9f0 50%,#e9ede8);min-height:100vh;padding:1.5rem 1rem}
-  @media(prefers-color-scheme:dark){body{background:linear-gradient(135deg,#1a1c24,#1e1c22 50%,#1a1e1a)}}
-  #app{max-width:640px;margin:0 auto;background:var(--bg);border-radius:var(--rlg);padding:1.5rem;box-shadow:var(--shlg);border:.5px solid var(--border)}
-  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.3rem}
-  .logo{display:flex;align-items:center;gap:10px}
-  .logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#4f7fd4,#7f5fc8);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 8px rgba(79,127,212,.35)}
-  h1{font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.3px}
-  .gbadge{font-size:12px;color:var(--text2);background:var(--bg2);padding:5px 12px;border-radius:20px;border:.5px solid var(--border);font-weight:500}
-  .subtitle{font-size:13px;color:var(--text2);margin-bottom:1rem;line-height:1.5}
-  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.1rem}
-  .stat{border-radius:var(--r);padding:11px 10px;text-align:center;border:.5px solid var(--border)}
-  .stat:nth-child(1){background:linear-gradient(135deg,#eef4ff,#e6eeff)}
-  .stat:nth-child(2){background:linear-gradient(135deg,#edfaf4,#e4f6ef)}
-  .stat:nth-child(3){background:linear-gradient(135deg,#fff4ec,#ffeee2)}
-  @media(prefers-color-scheme:dark){.stat:nth-child(1){background:linear-gradient(135deg,#1e2535,#1a2030)}.stat:nth-child(2){background:linear-gradient(135deg,#1a2e27,#182923)}.stat:nth-child(3){background:linear-gradient(135deg,#2e2218,#281d14)}}
-  .sv{font-size:26px;font-weight:700;color:var(--text)}.sl{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;margin-top:2px;font-weight:600}
-  .grid{display:grid;grid-template-columns:105px repeat(3,1fr);gap:6px}
-  .corner{background:transparent}
-  .clabel{border-radius:var(--r);padding:9px 7px;font-size:11px;font-weight:700;text-align:center;display:flex;align-items:center;justify-content:center;line-height:1.4;min-height:54px;border:.5px solid var(--border)}
-  .ccol{background:linear-gradient(160deg,#eef2ff,#e8ecfa);color:#3a5ab8}
-  .rlabel{border-radius:var(--r);padding:9px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.4;min-height:90px;border:.5px solid var(--border);background:linear-gradient(160deg,#f0faf6,#e6f5ef);color:#1e7a58}
-  @media(prefers-color-scheme:dark){.ccol{background:linear-gradient(160deg,#1e2535,#1a2030);color:#7aa0e8}.rlabel{background:linear-gradient(160deg,#1a2e27,#182923);color:#3ecf96}}
-  .cell{background:var(--bg);border:.5px solid var(--border);border-radius:var(--r);min-height:90px;display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;transition:transform .12s,box-shadow .12s,background .15s;padding:8px;box-shadow:var(--sh)}
-  .cell:hover:not(.filled):not(.locked){background:var(--bg2);border-color:var(--border2);transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.11)}
-  .cell.selected{border:2px solid var(--accent);background:linear-gradient(135deg,#f0f5ff,#eaf0ff);transform:translateY(-1px);box-shadow:0 4px 16px rgba(79,127,212,.2)}
-  @media(prefers-color-scheme:dark){.cell.selected{background:linear-gradient(135deg,#1e2535,#1a2030)}}
-  .cell.filled{cursor:default;background:linear-gradient(135deg,#f5fbf8,#edf8f3);border-color:rgba(26,158,117,.2)}
-  @media(prefers-color-scheme:dark){.cell.filled{background:linear-gradient(135deg,#1a2e27,#182923)}}
-  .cell.wrong{background:var(--wrong-bg)!important;border-color:var(--wrong)!important;animation:shake .35s ease}
-  .cell.locked{cursor:default;opacity:.75}
-  .cflag{font-size:24px;margin-bottom:3px;line-height:1}.cname{font-size:11px;font-weight:600;color:var(--text);text-align:center;line-height:1.3}.cpts{font-size:16px;font-weight:700;color:var(--correct);margin-top:3px}.cplus{font-size:28px;color:var(--border2);line-height:1;transition:color .15s}
-  .cell:hover .cplus{color:var(--accent)}
-  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}60%{transform:translateX(5px)}}
-  @keyframes popIn{0%{transform:scale(.82);opacity:0}65%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
-  .cell.pop{animation:popIn .3s ease forwards}
-  .iarea{margin-top:1rem;display:none;background:linear-gradient(135deg,#f7f9ff,#f3f5fd);border:.5px solid rgba(79,127,212,.2);border-radius:var(--rlg);padding:1rem;box-shadow:0 2px 12px rgba(79,127,212,.08)}
-  @media(prefers-color-scheme:dark){.iarea{background:linear-gradient(135deg,#1e2535,#1a2030);border-color:rgba(107,156,232,.2)}}
-  .iarea.visible{display:block}
-  .hint{font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6}.hint strong{color:var(--accent)}
-  .swrap{display:flex;gap:8px;margin-bottom:10px}
-  #search{flex:1;font-size:14px;padding:10px 14px;border:.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s}
-  #search:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,127,212,.15)}
-  .cbtn{padding:10px 14px;font-size:13px;border:.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text2);cursor:pointer;transition:background .15s;white-space:nowrap;font-weight:500}
-  .cbtn:hover{background:var(--bg3)}
-  .suggs{display:flex;flex-wrap:wrap;gap:6px;max-height:155px;overflow-y:auto}
-  .sug{padding:5px 12px;border:.5px solid var(--border);border-radius:20px;font-size:12px;cursor:pointer;background:var(--bg);color:var(--text);transition:background .12s,border-color .12s,transform .1s;font-weight:500}
-  .sug:hover{background:linear-gradient(135deg,#eef4ff,#e8ecfa);border-color:var(--accent);transform:translateY(-1px);color:var(--accent)}
-  @media(prefers-color-scheme:dark){.sug:hover{background:linear-gradient(135deg,#1e2535,#1a2030)}}
-  .msg{margin-top:10px;font-size:13px;min-height:18px;color:var(--text2);font-weight:500}.msg.ok{color:var(--correct)}.msg.err{color:var(--wrong)}
-  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;padding:1rem}
-  .overlay.visible{display:flex}
-  .modal{background:var(--bg);border-radius:var(--rlg);padding:2rem 1.5rem;max-width:380px;width:100%;text-align:center;box-shadow:var(--shlg);border:.5px solid var(--border)}
-  .micon{font-size:44px;margin-bottom:.5rem}.modal h2{font-size:22px;font-weight:700;margin-bottom:.4rem;letter-spacing:-.3px}
-  .mscore{font-size:52px;font-weight:800;background:linear-gradient(135deg,var(--accent),#7f5fc8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:.4rem 0}
-  .modal p{font-size:14px;color:var(--text2);margin-bottom:1.25rem;line-height:1.6}
-  .macts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-  .mbtn{padding:11px 22px;border:.5px solid var(--border2);border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;background:var(--bg2);color:var(--text);transition:background .15s,transform .1s}
-  .mbtn:hover{background:var(--bg3);transform:translateY(-1px)}
-  .mbtn.pri{background:linear-gradient(135deg,#4f7fd4,#6b6fd4);color:#fff;border:none;box-shadow:0 3px 12px rgba(79,127,212,.35)}
-  .mbtn.pri:hover{background:linear-gradient(135deg,#3d6fc4,#5a6fc4)}
-  footer{text-align:center;margin-top:1.1rem;font-size:12px;color:var(--text2)}
-  footer a{color:var(--accent);text-decoration:none;font-weight:500}
-  footer a:hover{text-decoration:underline}
-  @media(max-width:500px){#app{padding:1rem}.grid{grid-template-columns:85px repeat(3,1fr);gap:4px}.rlabel,.cell{min-height:78px}.clabel{min-height:46px;font-size:10px}h1{font-size:19px}}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#fff;--bg2:#f7f6f2;--bg3:#efeee9;--text:#1a1a19;--text2:#6b6b63;--border:rgba(0,0,0,.09);--border2:rgba(0,0,0,.18);--accent:#4f7fd4;--correct:#1a9e75;--wrong:#c0392b;--wrong-bg:#fdf0ee;--hint:#b07d2a;--hint-bg:#fff8ee;--r:14px;--rlg:20px;--sh:0 2px 12px rgba(0,0,0,.07);--shlg:0 4px 24px rgba(0,0,0,.11)}
+@media(prefers-color-scheme:dark){:root{--bg:#1c1c1a;--bg2:#252523;--bg3:#2e2e2b;--text:#f0efe9;--text2:#97978f;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.16);--accent:#6b9ce8;--correct:#1db882;--wrong:#e07070;--wrong-bg:#2e1a1a;--hint:#e0a840;--hint-bg:#2a2210;--sh:0 2px 12px rgba(0,0,0,.3);--shlg:0 4px 24px rgba(0,0,0,.4)}}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#e8edf7,#ece9f0 50%,#e9ede8);min-height:100vh;padding:1.5rem 1rem}
+@media(prefers-color-scheme:dark){body{background:linear-gradient(135deg,#1a1c24,#1e1c22 50%,#1a1e1a)}}
+#app{max-width:640px;margin:0 auto;background:var(--bg);border-radius:var(--rlg);padding:1.5rem;box-shadow:var(--shlg);border:.5px solid var(--border)}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.3rem}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#4f7fd4,#7f5fc8);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 8px rgba(79,127,212,.35)}
+h1{font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.gbadge{font-size:12px;color:var(--text2);background:var(--bg2);padding:5px 12px;border-radius:20px;border:.5px solid var(--border);font-weight:500}
+.subtitle{font-size:13px;color:var(--text2);margin-bottom:1rem;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.1rem}
+.stat{border-radius:var(--r);padding:11px 10px;text-align:center;border:.5px solid var(--border)}
+.stat:nth-child(1){background:linear-gradient(135deg,#eef4ff,#e6eeff)}
+.stat:nth-child(2){background:linear-gradient(135deg,#edfaf4,#e4f6ef)}
+.stat:nth-child(3){background:linear-gradient(135deg,#fff4ec,#ffeee2)}
+@media(prefers-color-scheme:dark){.stat:nth-child(1){background:linear-gradient(135deg,#1e2535,#1a2030)}.stat:nth-child(2){background:linear-gradient(135deg,#1a2e27,#182923)}.stat:nth-child(3){background:linear-gradient(135deg,#2e2218,#281d14)}}
+.sv{font-size:26px;font-weight:700;color:var(--text)}.sl{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;margin-top:2px;font-weight:600}
+.hint-bar{display:flex;justify-content:flex-end;margin-bottom:.75rem}
+#hint-btn{padding:7px 16px;font-size:12px;font-weight:600;border-radius:20px;border:.5px solid var(--hint);background:var(--hint-bg);color:var(--hint);cursor:pointer;transition:opacity .15s;display:flex;align-items:center;gap:5px}
+#hint-btn:disabled{opacity:.38;cursor:default}
+.grid{display:grid;grid-template-columns:105px repeat(3,1fr);gap:6px}
+.corner{background:transparent}
+.clabel{border-radius:var(--r);padding:9px 7px;font-size:11px;font-weight:700;text-align:center;display:flex;align-items:center;justify-content:center;line-height:1.4;min-height:54px;border:.5px solid var(--border)}
+.ccol{background:linear-gradient(160deg,#eef2ff,#e8ecfa);color:#3a5ab8}
+.rlabel{border-radius:var(--r);padding:9px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.4;min-height:90px;border:.5px solid var(--border);background:linear-gradient(160deg,#f0faf6,#e6f5ef);color:#1e7a58}
+@media(prefers-color-scheme:dark){.ccol{background:linear-gradient(160deg,#1e2535,#1a2030);color:#7aa0e8}.rlabel{background:linear-gradient(160deg,#1a2e27,#182923);color:#3ecf96}}
+.cell{background:var(--bg);border:.5px solid var(--border);border-radius:var(--r);min-height:90px;display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;transition:transform .12s,box-shadow .12s,background .15s;padding:8px;box-shadow:var(--sh)}
+.cell:hover:not(.filled):not(.locked){background:var(--bg2);border-color:var(--border2);transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.11)}
+.cell.selected{border:2px solid var(--accent);background:linear-gradient(135deg,#f0f5ff,#eaf0ff);transform:translateY(-1px);box-shadow:0 4px 16px rgba(79,127,212,.2)}
+@media(prefers-color-scheme:dark){.cell.selected{background:linear-gradient(135deg,#1e2535,#1a2030)}}
+.cell.filled{cursor:default;background:linear-gradient(135deg,#f5fbf8,#edf8f3);border-color:rgba(26,158,117,.2)}
+@media(prefers-color-scheme:dark){.cell.filled{background:linear-gradient(135deg,#1a2e27,#182923)}}
+.cell.hinted{background:linear-gradient(135deg,#fff8ee,#fff3d6)!important;border-color:rgba(176,125,42,.4)!important}
+@media(prefers-color-scheme:dark){.cell.hinted{background:linear-gradient(135deg,#2a2210,#231d0a)!important}}
+.cell.wrong{background:var(--wrong-bg)!important;border-color:var(--wrong)!important;animation:shake .35s ease}
+.cell.locked{cursor:default;opacity:.75}
+.cflag{font-size:24px;margin-bottom:3px;line-height:1}.cname{font-size:11px;font-weight:600;color:var(--text);text-align:center;line-height:1.3}.cpts{font-size:16px;font-weight:700;color:var(--correct);margin-top:3px}.cplus{font-size:28px;color:var(--border2);line-height:1;transition:color .15s}
+.cell:hover .cplus{color:var(--accent)}
+.htext{font-size:10px;color:var(--hint);font-weight:700;text-align:center;line-height:1.3;margin-top:4px}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}60%{transform:translateX(5px)}}
+@keyframes popIn{0%{transform:scale(.82);opacity:0}65%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+.cell.pop{animation:popIn .3s ease forwards}
+.iarea{margin-top:1rem;display:none;background:linear-gradient(135deg,#f7f9ff,#f3f5fd);border:.5px solid rgba(79,127,212,.2);border-radius:var(--rlg);padding:1rem;box-shadow:0 2px 12px rgba(79,127,212,.08)}
+@media(prefers-color-scheme:dark){.iarea{background:linear-gradient(135deg,#1e2535,#1a2030);border-color:rgba(107,156,232,.2)}}
+.iarea.visible{display:block}
+.ihint{font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6}.ihint strong{color:var(--accent)}
+.swrap{display:flex;gap:8px;margin-bottom:10px}
+#search{flex:1;font-size:14px;padding:10px 14px;border:.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s}
+#search:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,127,212,.15)}
+.cbtn{padding:10px 14px;font-size:13px;border:.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text2);cursor:pointer;transition:background .15s;white-space:nowrap;font-weight:500}
+.cbtn:hover{background:var(--bg3)}
+.suggs{display:flex;flex-wrap:wrap;gap:6px;max-height:155px;overflow-y:auto}
+.sug{padding:5px 12px;border:.5px solid var(--border);border-radius:20px;font-size:12px;cursor:pointer;background:var(--bg);color:var(--text);transition:background .12s,border-color .12s,transform .1s;font-weight:500}
+.sug:hover{background:linear-gradient(135deg,#eef4ff,#e8ecfa);border-color:var(--accent);transform:translateY(-1px);color:var(--accent)}
+@media(prefers-color-scheme:dark){.sug:hover{background:linear-gradient(135deg,#1e2535,#1a2030)}}
+.msg{margin-top:10px;font-size:13px;min-height:18px;color:var(--text2);font-weight:500}.msg.ok{color:var(--correct)}.msg.err{color:var(--wrong)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;padding:1rem;overflow-y:auto}
+.overlay.visible{display:flex}
+.modal{background:var(--bg);border-radius:var(--rlg);padding:2rem 1.5rem;max-width:440px;width:100%;text-align:center;box-shadow:var(--shlg);border:.5px solid var(--border);margin:auto}
+.micon{font-size:44px;margin-bottom:.5rem}.modal h2{font-size:22px;font-weight:700;margin-bottom:.4rem;letter-spacing:-.3px}
+.mscore{font-size:52px;font-weight:800;background:linear-gradient(135deg,var(--accent),#7f5fc8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:.4rem 0}
+.modal p{font-size:14px;color:var(--text2);margin-bottom:.75rem;line-height:1.6}
+.macts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.mbtn{padding:11px 22px;border:.5px solid var(--border2);border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;background:var(--bg2);color:var(--text);transition:background .15s,transform .1s}
+.mbtn:hover{background:var(--bg3);transform:translateY(-1px)}
+.mbtn.pri{background:linear-gradient(135deg,#4f7fd4,#6b6fd4);color:#fff;border:none;box-shadow:0 3px 12px rgba(79,127,212,.35)}
+.mbtn.pri:hover{background:linear-gradient(135deg,#3d6fc4,#5a6fc4)}
+.ans-section{margin:.75rem 0;text-align:left}
+.ans-title{font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.ans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.ans-cell{border-radius:10px;padding:7px 5px;font-size:11px;text-align:center;border:.5px solid var(--border)}
+.ans-cell.player{background:linear-gradient(135deg,#edfaf4,#e4f6ef);border-color:rgba(26,158,117,.2)}
+.ans-cell.best{background:linear-gradient(135deg,#f3f0ff,#ede8ff);border-color:rgba(127,95,200,.2)}
+.ans-cell.empty{background:var(--bg2);opacity:.6}
+.ans-flag{font-size:17px;line-height:1;margin-bottom:2px}
+.ans-name{font-size:10px;font-weight:600;color:var(--text);line-height:1.2}
+.ans-pts{font-size:11px;font-weight:700;margin-top:2px}
+.ans-pts.p{color:var(--correct)}.ans-pts.b{color:#7f5fc8}
+footer{text-align:center;margin-top:1.1rem;font-size:12px;color:var(--text2)}
+footer a{color:var(--accent);text-decoration:none;font-weight:500}
+footer a:hover{text-decoration:underline}
+@media(max-width:500px){#app{padding:1rem}.grid{grid-template-columns:82px repeat(3,1fr);gap:4px}.rlabel,.cell{min-height:75px}.clabel{min-height:44px;font-size:10px}h1{font-size:19px}}
 </style>
 </head>
 <body>
@@ -86,11 +103,14 @@
     <div class="stat"><div class="sv" id="filled-val">0/9</div><div class="sl">Filled</div></div>
     <div class="stat"><div class="sv" id="guesses-val">12</div><div class="sl">Guesses</div></div>
   </div>
+  <div class="hint-bar">
+    <button id="hint-btn" onclick="useHint()">💡 Use Hint <span id="hint-count">(1 left)</span></button>
+  </div>
   <div class="grid" id="main-grid"></div>
   <div class="iarea" id="iarea">
-    <div class="hint" id="hint"></div>
+    <div class="ihint" id="ihint"></div>
     <div class="swrap">
-      <input type="text" id="search" placeholder="Type a country name..." autocomplete="off" spellcheck="false" />
+      <input type="text" id="search" placeholder="Type a country name..." autocomplete="off" spellcheck="false"/>
       <button class="cbtn" onclick="cancelSelect()">Cancel</button>
     </div>
     <div class="suggs" id="suggs"></div>
@@ -105,7 +125,15 @@
     <h2 id="mtitle"></h2>
     <div class="mscore" id="mscore"></div>
     <p id="mbody"></p>
-    <div class="macts">
+    <div class="ans-section">
+      <div class="ans-title">Your answers</div>
+      <div class="ans-grid" id="player-grid"></div>
+    </div>
+    <div class="ans-section">
+      <div class="ans-title">Best possible answers (highest scoring)</div>
+      <div class="ans-grid" id="best-grid"></div>
+    </div>
+    <div class="macts" style="margin-top:1rem">
       <button class="mbtn pri" onclick="newGame()">New Game</button>
       <button class="mbtn" onclick="document.getElementById('end-overlay').classList.remove('visible')">View Board</button>
     </div>
@@ -116,9 +144,10 @@
   <div class="modal" onclick="event.stopPropagation()" style="text-align:left;max-width:420px">
     <h2 style="margin-bottom:1rem">How to play</h2>
     <p>Fill all <strong>9 cells</strong> with countries satisfying <strong>both</strong> the row and column category.</p>
-    <p style="margin-top:.75rem">You have <strong>12 guesses</strong> total — wrong guesses count too. Each country can only be used once.</p>
-    <p style="margin-top:.75rem"><strong>Scoring:</strong> 5–100 pts per cell. Smaller, less obvious countries score more!</p>
-    <p style="margin-top:.75rem"><strong>Categories include:</strong> regions, geography, population, flag colors, language, currency zone, and climate.</p>
+    <p style="margin-top:.6rem">You have <strong>12 guesses</strong> total — wrong ones count too. Each country can only be used once.</p>
+    <p style="margin-top:.6rem"><strong>Scoring:</strong> 5–100 pts per cell. Smaller, less obvious countries score more!</p>
+    <p style="margin-top:.6rem"><strong>Hint:</strong> You get <strong>one hint</strong> per game. It highlights the hardest cell and suggests a high-scoring country for it.</p>
+    <p style="margin-top:.6rem"><strong>At the end</strong> you can see your answers vs the best possible picks for each cell.</p>
     <div class="macts" style="margin-top:1.25rem">
       <button class="mbtn pri" onclick="document.getElementById('help-overlay').classList.remove('visible')">Got it!</button>
     </div>
@@ -127,282 +156,278 @@
 
 <script>
 const C=[
-  // Western Europe
-  {n:"France",r:"Western Europe",co:"Europe",i:false,ll:false,p:68e6,f:"🇫🇷",cl:["blue","white","red"],lang:"romance",cur:"euro",climate:"temperate"},
-  {n:"Germany",r:"Western Europe",co:"Europe",i:false,ll:false,p:83e6,f:"🇩🇪",cl:["black","red","gold"],lang:"germanic",cur:"euro",climate:"temperate"},
-  {n:"Netherlands",r:"Western Europe",co:"Europe",i:false,ll:false,p:17e6,f:"🇳🇱",cl:["red","white","blue"],lang:"germanic",cur:"euro",climate:"temperate"},
-  {n:"Belgium",r:"Western Europe",co:"Europe",i:false,ll:false,p:11.5e6,f:"🇧🇪",cl:["black","yellow","red"],lang:"germanic",cur:"euro",climate:"temperate"},
-  {n:"Luxembourg",r:"Western Europe",co:"Europe",i:false,ll:true,p:660e3,f:"🇱🇺",cl:["red","white","blue"],lang:"romance",cur:"euro",climate:"temperate"},
-  {n:"Switzerland",r:"Western Europe",co:"Europe",i:false,ll:true,p:8.6e6,f:"🇨🇭",cl:["red","white"],lang:"germanic",cur:"other",climate:"temperate"},
-  {n:"Austria",r:"Western Europe",co:"Europe",i:false,ll:true,p:9e6,f:"🇦🇹",cl:["red","white"],lang:"germanic",cur:"euro",climate:"temperate"},
-  {n:"Liechtenstein",r:"Western Europe",co:"Europe",i:false,ll:true,p:38e3,f:"🇱🇮",cl:["blue","red","gold"],lang:"germanic",cur:"other",climate:"temperate"},
-  // Southern Europe
-  {n:"Italy",r:"Southern Europe",co:"Europe",i:false,ll:false,p:60e6,f:"🇮🇹",cl:["green","white","red"],lang:"romance",cur:"euro",climate:"mediterranean"},
-  {n:"Spain",r:"Southern Europe",co:"Europe",i:false,ll:false,p:47e6,f:"🇪🇸",cl:["red","yellow"],lang:"romance",cur:"euro",climate:"mediterranean"},
-  {n:"Portugal",r:"Southern Europe",co:"Europe",i:false,ll:false,p:10e6,f:"🇵🇹",cl:["green","red","yellow"],lang:"romance",cur:"euro",climate:"mediterranean"},
-  {n:"Greece",r:"Southern Europe",co:"Europe",i:false,ll:false,p:10e6,f:"🇬🇷",cl:["blue","white"],lang:"other",climate:"mediterranean"},
-  {n:"Croatia",r:"Balkans",co:"Europe",i:false,ll:false,p:4e6,f:"🇭🇷",cl:["red","white","blue"],lang:"slavic",cur:"euro",climate:"mediterranean"},
-  {n:"Slovenia",r:"Balkans",co:"Europe",i:false,ll:false,p:2.1e6,f:"🇸🇮",cl:["white","blue","red"],lang:"slavic",cur:"euro",climate:"temperate"},
-  {n:"Bosnia",r:"Balkans",co:"Europe",i:false,ll:false,p:3.3e6,f:"🇧🇦",cl:["blue","yellow","white"],lang:"slavic",cur:"other",climate:"temperate"},
-  {n:"Montenegro",r:"Balkans",co:"Europe",i:false,ll:false,p:620e3,f:"🇲🇪",cl:["red","gold"],lang:"slavic",cur:"euro",climate:"mediterranean"},
-  {n:"Albania",r:"Balkans",co:"Europe",i:false,ll:false,p:2.8e6,f:"🇦🇱",cl:["red","black"],lang:"other",cur:"other",climate:"mediterranean"},
-  {n:"North Macedonia",r:"Balkans",co:"Europe",i:false,ll:true,p:2.1e6,f:"🇲🇰",cl:["red","yellow"],lang:"slavic",cur:"other",climate:"temperate"},
-  {n:"Serbia",r:"Balkans",co:"Europe",i:false,ll:true,p:7e6,f:"🇷🇸",cl:["red","blue","white"],lang:"slavic",cur:"other",climate:"temperate"},
-  {n:"Kosovo",r:"Balkans",co:"Europe",i:false,ll:true,p:1.8e6,f:"🇽🇰",cl:["blue","yellow","white"],lang:"other",cur:"euro",climate:"temperate"},
-  {n:"Malta",r:"Southern Europe",co:"Europe",i:true,ll:false,p:525e3,f:"🇲🇹",cl:["white","red"],lang:"other",cur:"euro",climate:"mediterranean"},
-  {n:"Cyprus",r:"Southern Europe",co:"Europe",i:true,ll:false,p:1.2e6,f:"🇨🇾",cl:["white","orange","green"],lang:"other",cur:"euro",climate:"mediterranean"},
-  // Scandinavia
-  {n:"Sweden",r:"Scandinavia",co:"Europe",i:false,ll:false,p:10e6,f:"🇸🇪",cl:["blue","yellow"],lang:"germanic",cur:"other",climate:"temperate"},
-  {n:"Norway",r:"Scandinavia",co:"Europe",i:false,ll:false,p:5.4e6,f:"🇳🇴",cl:["red","white","blue"],lang:"germanic",cur:"other",climate:"temperate"},
-  {n:"Finland",r:"Scandinavia",co:"Europe",i:false,ll:false,p:5.5e6,f:"🇫🇮",cl:["white","blue"],lang:"other",cur:"euro",climate:"temperate"},
-  {n:"Denmark",r:"Scandinavia",co:"Europe",i:false,ll:false,p:5.9e6,f:"🇩🇰",cl:["red","white"],lang:"germanic",cur:"other",climate:"temperate"},
-  {n:"Iceland",r:"Scandinavia",co:"Europe",i:true,ll:false,p:370e3,f:"🇮🇸",cl:["blue","white","red"],lang:"germanic",cur:"other",climate:"temperate"},
-  // Eastern Europe
-  {n:"Poland",r:"Eastern Europe",co:"Europe",i:false,ll:false,p:38e6,f:"🇵🇱",cl:["white","red"],lang:"slavic",cur:"other",climate:"temperate"},
-  {n:"Romania",r:"Eastern Europe",co:"Europe",i:false,ll:false,p:19e6,f:"🇷🇴",cl:["blue","yellow","red"],lang:"romance",cur:"other",climate:"temperate"},
-  {n:"Ukraine",r:"Eastern Europe",co:"Europe",i:false,ll:false,p:44e6,f:"🇺🇦",cl:["blue","yellow"],lang:"slavic",cur:"other",climate:"temperate"},
-  {n:"Bulgaria",r:"Eastern Europe",co:"Europe",i:false,ll:false,p:6.5e6,f:"🇧🇬",cl:["white","green","red"],lang:"slavic",cur:"other",climate:"temperate"},
-  {n:"Hungary",r:"Eastern Europe",co:"Europe",i:false,ll:true,p:9.7e6,f:"🇭🇺",cl:["red","white","green"],lang:"other",cur:"other",climate:"temperate"},
-  {n:"Czech Republic",r:"Eastern Europe",co:"Europe",i:false,ll:true,p:10.7e6,f:"🇨🇿",cl:["white","red","blue"],lang:"slavic",cur:"other",climate:"temperate"},
-  {n:"Slovakia",r:"Eastern Europe",co:"Europe",i:false,ll:true,p:5.5e6,f:"🇸🇰",cl:["white","blue","red"],lang:"slavic",cur:"euro",climate:"temperate"},
-  {n:"Moldova",r:"Eastern Europe",co:"Europe",i:false,ll:true,p:2.6e6,f:"🇲🇩",cl:["blue","yellow","red"],lang:"romance",cur:"other",climate:"temperate"},
-  {n:"Belarus",r:"Eastern Europe",co:"Europe",i:false,ll:true,p:9.4e6,f:"🇧🇾",cl:["red","green","white"],lang:"slavic",cur:"other",climate:"temperate"},
-  // Caucasus
-  {n:"Georgia",r:"Caucasus",co:"Europe",i:false,ll:false,p:3.7e6,f:"🇬🇪",cl:["white","red"],lang:"other",cur:"other",climate:"temperate"},
-  {n:"Armenia",r:"Caucasus",co:"Europe",i:false,ll:true,p:3e6,f:"🇦🇲",cl:["red","blue","orange"],lang:"other",cur:"other",climate:"temperate"},
-  {n:"Azerbaijan",r:"Caucasus",co:"Europe",i:false,ll:false,p:10e6,f:"🇦🇿",cl:["blue","red","green","white"],lang:"turkic",cur:"other",climate:"temperate"},
-  // British Isles
-  {n:"United Kingdom",r:"British Isles",co:"Europe",i:true,ll:false,p:67e6,f:"🇬🇧",cl:["blue","red","white"],lang:"germanic",cur:"other",climate:"temperate"},
-  {n:"Ireland",r:"British Isles",co:"Europe",i:true,ll:false,p:5e6,f:"🇮🇪",cl:["green","white","orange"],lang:"germanic",cur:"euro",climate:"temperate"},
-  // East Asia
-  {n:"Japan",r:"East Asia",co:"Asia",i:true,ll:false,p:125e6,f:"🇯🇵",cl:["white","red"],lang:"other",cur:"other",climate:"temperate"},
-  {n:"China",r:"East Asia",co:"Asia",i:false,ll:false,p:1400e6,f:"🇨🇳",cl:["red","yellow"],lang:"other",cur:"other",climate:"varied"},
-  {n:"South Korea",r:"East Asia",co:"Asia",i:false,ll:false,p:52e6,f:"🇰🇷",cl:["white","red","blue","black"],lang:"other",cur:"other",climate:"temperate"},
-  {n:"North Korea",r:"East Asia",co:"Asia",i:false,ll:false,p:25e6,f:"🇰🇵",cl:["red","white","blue"],lang:"other",cur:"other",climate:"temperate"},
-  {n:"Mongolia",r:"East Asia",co:"Asia",i:false,ll:true,p:3.3e6,f:"🇲🇳",cl:["red","blue","yellow"],lang:"other",cur:"other",climate:"arid"},
-  {n:"Taiwan",r:"East Asia",co:"Asia",i:true,ll:false,p:23e6,f:"🇹🇼",cl:["red","blue","white"],lang:"other",cur:"other",climate:"tropical"},
-  // Southeast Asia
-  {n:"Indonesia",r:"Southeast Asia",co:"Asia",i:true,ll:false,p:270e6,f:"🇮🇩",cl:["red","white"],lang:"other",cur:"other",climate:"tropical"},
-  {n:"Philippines",r:"Southeast Asia",co:"Asia",i:true,ll:false,p:110e6,f:"🇵🇭",cl:["blue","red","white","yellow"],lang:"other",cur:"other",climate:"tropical"},
-  {n:"Thailand",r:"Southeast Asia",co:"Asia",i:false,ll:false,p:70e6,f:"🇹🇭",cl:["red","white","blue"],lang:"other",cur:"other",climate:"tropical"},
-  {n:"Vietnam",r:"Southeast Asia",co:"Asia",i:false,ll:false,p:97e6,f:"🇻🇳",cl:["red","yellow"],lang:"other",cur:"other",climate:"tropical"},
-  {n:"Malaysia",r:"Southeast Asia",co:"Asia",i:false,ll:false,p:32e6,f:"🇲🇾",cl:["red","white","blue","yellow"],lang:"other",cur:"other",climate:"tropical"},
-  {n:"Myanmar",r:"Southeast Asia",co:"Asia",i:false,ll:false,p:54e6,f:"🇲🇲",cl:["yellow","green","red","white"],lang:"other",cur:"other",climate:"tropical"},
-  {n:"Cambodia",r:"Southeast Asia",co:"Asia",i:false,ll:false,p:16e6,f:"🇰🇭",cl:["red","blue","white"],lang:"other",cur:"other",climate:"tropical"},
-  {n:"Singapore",r:"Southeast Asia",co:"Asia",i:true,ll:false,p:5.8e6,f:"🇸🇬",cl:["red","white"],lang:"other",cur:"other",climate:"tropical"},
-  {n:"Laos",r:"Southeast Asia",co:"Asia",i:false,ll:true,p:7e6,f:"🇱🇦",cl:["red","blue","white"],lang:"other",cur:"other",climate:"tropical"},
-  {n:"Timor-Leste",r:"Southeast Asia",co:"Asia",i:true,ll:false,p:1.3e6,f:"🇹🇱",cl:["red","black","yellow","white"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Brunei",r:"Southeast Asia",co:"Asia",i:false,ll:false,p:440e3,f:"🇧🇳",cl:["yellow","white","black"],lang:"other",cur:"other",climate:"tropical"},
-  // South Asia
-  {n:"India",r:"South Asia",co:"Asia",i:false,ll:false,p:1380e6,f:"🇮🇳",cl:["orange","white","green","blue"],lang:"other",cur:"other",climate:"varied"},
-  {n:"Pakistan",r:"South Asia",co:"Asia",i:false,ll:false,p:220e6,f:"🇵🇰",cl:["green","white"],lang:"other",cur:"other",climate:"arid"},
-  {n:"Bangladesh",r:"South Asia",co:"Asia",i:false,ll:false,p:165e6,f:"🇧🇩",cl:["green","red"],lang:"other",cur:"other",climate:"tropical"},
-  {n:"Sri Lanka",r:"South Asia",co:"Asia",i:true,ll:false,p:21e6,f:"🇱🇰",cl:["maroon","orange","green","yellow"],lang:"other",cur:"other",climate:"tropical"},
-  {n:"Nepal",r:"South Asia",co:"Asia",i:false,ll:true,p:29e6,f:"🇳🇵",cl:["red","blue","white"],lang:"other",cur:"other",climate:"varied"},
-  {n:"Maldives",r:"South Asia",co:"Asia",i:true,ll:false,p:540e3,f:"🇲🇻",cl:["red","green","white"],lang:"other",cur:"other",climate:"tropical"},
-  {n:"Bhutan",r:"South Asia",co:"Asia",i:false,ll:true,p:780e3,f:"🇧🇹",cl:["orange","red","yellow","white"],lang:"other",cur:"other",climate:"varied"},
-  // Central Asia
-  {n:"Kazakhstan",r:"Central Asia",co:"Asia",i:false,ll:true,p:19e6,f:"🇰🇿",cl:["blue","yellow"],lang:"turkic",cur:"other",climate:"arid"},
-  {n:"Uzbekistan",r:"Central Asia",co:"Asia",i:false,ll:true,p:34e6,f:"🇺🇿",cl:["blue","white","green"],lang:"turkic",cur:"other",climate:"arid"},
-  {n:"Kyrgyzstan",r:"Central Asia",co:"Asia",i:false,ll:true,p:6.5e6,f:"🇰🇬",cl:["red","yellow"],lang:"turkic",cur:"other",climate:"arid"},
-  {n:"Tajikistan",r:"Central Asia",co:"Asia",i:false,ll:true,p:9.5e6,f:"🇹🇯",cl:["red","white","green"],lang:"other",cur:"other",climate:"arid"},
-  {n:"Turkmenistan",r:"Central Asia",co:"Asia",i:false,ll:true,p:6e6,f:"🇹🇲",cl:["green","white","red"],lang:"turkic",cur:"other",climate:"arid"},
-  {n:"Afghanistan",r:"Central Asia",co:"Asia",i:false,ll:true,p:38e6,f:"🇦🇫",cl:["black","red","green","white"],lang:"other",cur:"other",climate:"arid"},
-  // Middle East
-  {n:"Saudi Arabia",r:"Middle East",co:"Asia",i:false,ll:false,p:35e6,f:"🇸🇦",cl:["green","white"],lang:"arabic",cur:"other",climate:"arid"},
-  {n:"Iran",r:"Middle East",co:"Asia",i:false,ll:false,p:84e6,f:"🇮🇷",cl:["green","white","red"],lang:"other",cur:"other",climate:"arid"},
-  {n:"Iraq",r:"Middle East",co:"Asia",i:false,ll:false,p:40e6,f:"🇮🇶",cl:["red","white","black","green"],lang:"arabic",cur:"other",climate:"arid"},
-  {n:"Turkey",r:"Middle East",co:"Asia",i:false,ll:false,p:84e6,f:"🇹🇷",cl:["red","white"],lang:"turkic",cur:"other",climate:"mediterranean"},
-  {n:"Israel",r:"Middle East",co:"Asia",i:false,ll:false,p:9e6,f:"🇮🇱",cl:["white","blue"],lang:"other",cur:"other",climate:"mediterranean"},
-  {n:"Jordan",r:"Middle East",co:"Asia",i:false,ll:false,p:10e6,f:"🇯🇴",cl:["black","white","green","red"],lang:"arabic",cur:"other",climate:"arid"},
-  {n:"Lebanon",r:"Middle East",co:"Asia",i:false,ll:false,p:5.2e6,f:"🇱🇧",cl:["red","white","green"],lang:"arabic",cur:"other",climate:"mediterranean"},
-  {n:"UAE",r:"Middle East",co:"Asia",i:false,ll:false,p:9.9e6,f:"🇦🇪",cl:["red","green","white","black"],lang:"arabic",cur:"other",climate:"arid"},
-  {n:"Qatar",r:"Middle East",co:"Asia",i:false,ll:false,p:2.8e6,f:"🇶🇦",cl:["maroon","white"],lang:"arabic",cur:"other",climate:"arid"},
-  {n:"Kuwait",r:"Middle East",co:"Asia",i:false,ll:false,p:4.3e6,f:"🇰🇼",cl:["green","white","red","black"],lang:"arabic",cur:"other",climate:"arid"},
-  {n:"Oman",r:"Middle East",co:"Asia",i:false,ll:false,p:4.5e6,f:"🇴🇲",cl:["red","white","green"],lang:"arabic",cur:"other",climate:"arid"},
-  {n:"Yemen",r:"Middle East",co:"Asia",i:false,ll:false,p:33e6,f:"🇾🇪",cl:["red","white","black"],lang:"arabic",cur:"other",climate:"arid"},
-  {n:"Syria",r:"Middle East",co:"Asia",i:false,ll:false,p:21e6,f:"🇸🇾",cl:["red","white","black","green"],lang:"arabic",cur:"other",climate:"arid"},
-  {n:"Bahrain",r:"Middle East",co:"Asia",i:true,ll:false,p:1.7e6,f:"🇧🇭",cl:["red","white"],lang:"arabic",cur:"other",climate:"arid"},
-  // South America
-  {n:"Brazil",r:"South America",co:"South America",i:false,ll:false,p:213e6,f:"🇧🇷",cl:["green","yellow","blue","white"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Argentina",r:"South America",co:"South America",i:false,ll:false,p:45e6,f:"🇦🇷",cl:["blue","white","yellow"],lang:"romance",cur:"other",climate:"temperate"},
-  {n:"Colombia",r:"South America",co:"South America",i:false,ll:false,p:51e6,f:"🇨🇴",cl:["yellow","blue","red"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Peru",r:"South America",co:"South America",i:false,ll:false,p:33e6,f:"🇵🇪",cl:["red","white"],lang:"romance",cur:"other",climate:"varied"},
-  {n:"Chile",r:"South America",co:"South America",i:false,ll:false,p:19e6,f:"🇨🇱",cl:["red","white","blue","yellow"],lang:"romance",cur:"other",climate:"varied"},
-  {n:"Venezuela",r:"South America",co:"South America",i:false,ll:false,p:28e6,f:"🇻🇪",cl:["yellow","blue","red"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Ecuador",r:"South America",co:"South America",i:false,ll:false,p:18e6,f:"🇪🇨",cl:["yellow","blue","red"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Uruguay",r:"South America",co:"South America",i:false,ll:false,p:3.5e6,f:"🇺🇾",cl:["white","blue","yellow"],lang:"romance",cur:"other",climate:"temperate"},
-  {n:"Guyana",r:"South America",co:"South America",i:false,ll:false,p:790e3,f:"🇬🇾",cl:["green","yellow","red","white","black"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Suriname",r:"South America",co:"South America",i:false,ll:false,p:590e3,f:"🇸🇷",cl:["green","white","red","yellow"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Bolivia",r:"South America",co:"South America",i:false,ll:true,p:12e6,f:"🇧🇴",cl:["red","yellow","green"],lang:"romance",cur:"other",climate:"varied"},
-  {n:"Paraguay",r:"South America",co:"South America",i:false,ll:true,p:7.3e6,f:"🇵🇾",cl:["red","white","blue"],lang:"romance",cur:"other",climate:"tropical"},
-  // Caribbean
-  {n:"Cuba",r:"Caribbean",co:"North America",i:true,ll:false,p:11e6,f:"🇨🇺",cl:["blue","white","red"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Jamaica",r:"Caribbean",co:"North America",i:true,ll:false,p:2.96e6,f:"🇯🇲",cl:["black","green","yellow"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Haiti",r:"Caribbean",co:"North America",i:true,ll:false,p:11e6,f:"🇭🇹",cl:["blue","red"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Dominican Republic",r:"Caribbean",co:"North America",i:true,ll:false,p:10.8e6,f:"🇩🇴",cl:["blue","red","white"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Trinidad and Tobago",r:"Caribbean",co:"North America",i:true,ll:false,p:1.4e6,f:"🇹🇹",cl:["red","white","black"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Bahamas",r:"Caribbean",co:"North America",i:true,ll:false,p:390e3,f:"🇧🇸",cl:["blue","black","yellow"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Barbados",r:"Caribbean",co:"North America",i:true,ll:false,p:287e3,f:"🇧🇧",cl:["blue","yellow","black"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Saint Lucia",r:"Caribbean",co:"North America",i:true,ll:false,p:184e3,f:"🇱🇨",cl:["blue","white","yellow","black"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Grenada",r:"Caribbean",co:"North America",i:true,ll:false,p:113e3,f:"🇬🇩",cl:["red","yellow","green"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Belize",r:"Caribbean",co:"North America",i:false,ll:false,p:400e3,f:"🇧🇿",cl:["blue","red","white"],lang:"germanic",cur:"other",climate:"tropical"},
-  // Central America
-  {n:"Mexico",r:"Central America",co:"North America",i:false,ll:false,p:128e6,f:"🇲🇽",cl:["green","white","red"],lang:"romance",cur:"other",climate:"varied"},
-  {n:"Guatemala",r:"Central America",co:"North America",i:false,ll:false,p:17e6,f:"🇬🇹",cl:["blue","white"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Honduras",r:"Central America",co:"North America",i:false,ll:false,p:10e6,f:"🇭🇳",cl:["blue","white"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"El Salvador",r:"Central America",co:"North America",i:false,ll:false,p:6.5e6,f:"🇸🇻",cl:["blue","white"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Nicaragua",r:"Central America",co:"North America",i:false,ll:false,p:6.6e6,f:"🇳🇮",cl:["blue","white","yellow"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Costa Rica",r:"Central America",co:"North America",i:false,ll:false,p:5.1e6,f:"🇨🇷",cl:["blue","white","red"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Panama",r:"Central America",co:"North America",i:false,ll:false,p:4.3e6,f:"🇵🇦",cl:["red","white","blue"],lang:"romance",cur:"other",climate:"tropical"},
-  // North America
-  {n:"United States",r:"North America",co:"North America",i:false,ll:false,p:331e6,f:"🇺🇸",cl:["red","white","blue"],lang:"germanic",cur:"other",climate:"varied"},
-  {n:"Canada",r:"North America",co:"North America",i:false,ll:false,p:38e6,f:"🇨🇦",cl:["red","white"],lang:"germanic",cur:"other",climate:"temperate"},
-  // North Africa
-  {n:"Egypt",r:"North Africa",co:"Africa",i:false,ll:false,p:102e6,f:"🇪🇬",cl:["red","white","black"],lang:"arabic",cur:"other",climate:"arid"},
-  {n:"Morocco",r:"North Africa",co:"Africa",i:false,ll:false,p:37e6,f:"🇲🇦",cl:["red","green"],lang:"arabic",cur:"other",climate:"mediterranean"},
-  {n:"Algeria",r:"North Africa",co:"Africa",i:false,ll:false,p:44e6,f:"🇩🇿",cl:["green","white","red"],lang:"arabic",cur:"other",climate:"arid"},
-  {n:"Tunisia",r:"North Africa",co:"Africa",i:false,ll:false,p:12e6,f:"🇹🇳",cl:["red","white"],lang:"arabic",cur:"other",climate:"mediterranean"},
-  {n:"Libya",r:"North Africa",co:"Africa",i:false,ll:false,p:7e6,f:"🇱🇾",cl:["black","red","green","white"],lang:"arabic",cur:"other",climate:"arid"},
-  {n:"Sudan",r:"North Africa",co:"Africa",i:false,ll:false,p:45e6,f:"🇸🇩",cl:["red","white","black","green"],lang:"arabic",cur:"other",climate:"arid"},
-  // West Africa
-  {n:"Nigeria",r:"West Africa",co:"Africa",i:false,ll:false,p:211e6,f:"🇳🇬",cl:["green","white"],lang:"other",cur:"other",climate:"tropical"},
-  {n:"Ghana",r:"West Africa",co:"Africa",i:false,ll:false,p:32e6,f:"🇬🇭",cl:["red","yellow","green","black"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Senegal",r:"West Africa",co:"Africa",i:false,ll:false,p:17e6,f:"🇸🇳",cl:["green","yellow","red"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Cameroon",r:"West Africa",co:"Africa",i:false,ll:false,p:27e6,f:"🇨🇲",cl:["green","red","yellow"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Ivory Coast",r:"West Africa",co:"Africa",i:false,ll:false,p:26e6,f:"🇨🇮",cl:["orange","white","green"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Guinea",r:"West Africa",co:"Africa",i:false,ll:false,p:13e6,f:"🇬🇳",cl:["red","yellow","green"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Benin",r:"West Africa",co:"Africa",i:false,ll:false,p:12e6,f:"🇧🇯",cl:["yellow","red","green"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Togo",r:"West Africa",co:"Africa",i:false,ll:false,p:8e6,f:"🇹🇬",cl:["green","yellow","red","white"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Sierra Leone",r:"West Africa",co:"Africa",i:false,ll:false,p:8e6,f:"🇸🇱",cl:["green","white","blue"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Liberia",r:"West Africa",co:"Africa",i:false,ll:false,p:5e6,f:"🇱🇷",cl:["red","white","blue"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Mali",r:"West Africa",co:"Africa",i:false,ll:true,p:22e6,f:"🇲🇱",cl:["green","yellow","red"],lang:"romance",cur:"other",climate:"arid"},
-  {n:"Burkina Faso",r:"West Africa",co:"Africa",i:false,ll:true,p:22e6,f:"🇧🇫",cl:["red","green","yellow"],lang:"romance",cur:"other",climate:"arid"},
-  {n:"Niger",r:"West Africa",co:"Africa",i:false,ll:true,p:24e6,f:"🇳🇪",cl:["orange","white","green"],lang:"romance",cur:"other",climate:"arid"},
-  {n:"Cape Verde",r:"West Africa",co:"Africa",i:true,ll:false,p:560e3,f:"🇨🇻",cl:["blue","white","red","yellow"],lang:"romance",cur:"other",climate:"tropical"},
-  // East Africa
-  {n:"Ethiopia",r:"East Africa",co:"Africa",i:false,ll:true,p:120e6,f:"🇪🇹",cl:["green","yellow","red","blue"],lang:"other",cur:"other",climate:"tropical"},
-  {n:"Tanzania",r:"East Africa",co:"Africa",i:false,ll:false,p:61e6,f:"🇹🇿",cl:["green","black","yellow","blue"],lang:"other",cur:"other",climate:"tropical"},
-  {n:"Kenya",r:"East Africa",co:"Africa",i:false,ll:false,p:54e6,f:"🇰🇪",cl:["black","red","green","white"],lang:"other",cur:"other",climate:"tropical"},
-  {n:"Uganda",r:"East Africa",co:"Africa",i:false,ll:true,p:47e6,f:"🇺🇬",cl:["black","yellow","red","white"],lang:"other",cur:"other",climate:"tropical"},
-  {n:"Rwanda",r:"East Africa",co:"Africa",i:false,ll:true,p:13e6,f:"🇷🇼",cl:["blue","yellow","green"],lang:"other",cur:"other",climate:"tropical"},
-  {n:"Somalia",r:"East Africa",co:"Africa",i:false,ll:false,p:16e6,f:"🇸🇴",cl:["blue","white"],lang:"other",cur:"other",climate:"arid"},
-  {n:"Eritrea",r:"East Africa",co:"Africa",i:false,ll:false,p:3.5e6,f:"🇪🇷",cl:["green","red","blue","yellow"],lang:"other",cur:"other",climate:"arid"},
-  {n:"Djibouti",r:"East Africa",co:"Africa",i:false,ll:false,p:990e3,f:"🇩🇯",cl:["blue","green","white","red"],lang:"arabic",cur:"other",climate:"arid"},
-  {n:"Madagascar",r:"East Africa",co:"Africa",i:true,ll:false,p:28e6,f:"🇲🇬",cl:["white","red","green"],lang:"other",cur:"other",climate:"tropical"},
-  // Southern Africa
-  {n:"South Africa",r:"Southern Africa",co:"Africa",i:false,ll:false,p:60e6,f:"🇿🇦",cl:["green","black","yellow","red","white","blue"],lang:"germanic",cur:"other",climate:"temperate"},
-  {n:"DR Congo",r:"Southern Africa",co:"Africa",i:false,ll:false,p:90e6,f:"🇨🇩",cl:["blue","red","yellow"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Angola",r:"Southern Africa",co:"Africa",i:false,ll:false,p:33e6,f:"🇦🇴",cl:["red","black","yellow"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Mozambique",r:"Southern Africa",co:"Africa",i:false,ll:false,p:32e6,f:"🇲🇿",cl:["green","yellow","black","red","white"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Zambia",r:"Southern Africa",co:"Africa",i:false,ll:true,p:19e6,f:"🇿🇲",cl:["green","red","black","orange"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Zimbabwe",r:"Southern Africa",co:"Africa",i:false,ll:true,p:15e6,f:"🇿🇼",cl:["green","yellow","red","black","white"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Botswana",r:"Southern Africa",co:"Africa",i:false,ll:true,p:2.6e6,f:"🇧🇼",cl:["blue","black","white"],lang:"germanic",cur:"other",climate:"arid"},
-  {n:"Malawi",r:"Southern Africa",co:"Africa",i:false,ll:true,p:19e6,f:"🇲🇼",cl:["black","red","green","white"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Namibia",r:"Southern Africa",co:"Africa",i:false,ll:false,p:2.6e6,f:"🇳🇦",cl:["blue","red","green","yellow","white"],lang:"germanic",cur:"other",climate:"arid"},
-  {n:"Lesotho",r:"Southern Africa",co:"Africa",i:false,ll:true,p:2.1e6,f:"🇱🇸",cl:["blue","white","green","black"],lang:"other",cur:"other",climate:"temperate"},
-  {n:"Eswatini",r:"Southern Africa",co:"Africa",i:false,ll:true,p:1.2e6,f:"🇸🇿",cl:["blue","yellow","red","black"],lang:"other",cur:"other",climate:"temperate"},
-  // Oceania
-  {n:"Australia",r:"Oceania",co:"Oceania",i:true,ll:false,p:25e6,f:"🇦🇺",cl:["blue","red","white"],lang:"germanic",cur:"other",climate:"varied"},
-  {n:"New Zealand",r:"Oceania",co:"Oceania",i:true,ll:false,p:5e6,f:"🇳🇿",cl:["blue","red","white"],lang:"germanic",cur:"other",climate:"temperate"},
-  {n:"Papua New Guinea",r:"Pacific Islands",co:"Oceania",i:true,ll:false,p:9e6,f:"🇵🇬",cl:["black","red","yellow","white"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Fiji",r:"Pacific Islands",co:"Oceania",i:true,ll:false,p:930e3,f:"🇫🇯",cl:["blue","white","red","yellow"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Vanuatu",r:"Pacific Islands",co:"Oceania",i:true,ll:false,p:307e3,f:"🇻🇺",cl:["black","red","green","yellow"],lang:"romance",cur:"other",climate:"tropical"},
-  {n:"Samoa",r:"Pacific Islands",co:"Oceania",i:true,ll:false,p:220e3,f:"🇼🇸",cl:["red","white","blue"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Tonga",r:"Pacific Islands",co:"Oceania",i:true,ll:false,p:100e3,f:"🇹🇴",cl:["red","white"],lang:"other",cur:"other",climate:"tropical"},
-  {n:"Kiribati",r:"Pacific Islands",co:"Oceania",i:true,ll:false,p:120e3,f:"🇰🇮",cl:["red","white","blue","yellow"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Palau",r:"Pacific Islands",co:"Oceania",i:true,ll:false,p:18e3,f:"🇵🇼",cl:["blue","yellow"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Solomon Islands",r:"Pacific Islands",co:"Oceania",i:true,ll:false,p:690e3,f:"🇸🇧",cl:["blue","green","yellow","white"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Micronesia",r:"Pacific Islands",co:"Oceania",i:true,ll:false,p:115e3,f:"🇫🇲",cl:["blue","white"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Marshall Islands",r:"Pacific Islands",co:"Oceania",i:true,ll:false,p:42e3,f:"🇲🇭",cl:["blue","orange","white"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Nauru",r:"Pacific Islands",co:"Oceania",i:true,ll:false,p:10e3,f:"🇳🇷",cl:["blue","yellow","white"],lang:"germanic",cur:"other",climate:"tropical"},
-  {n:"Tuvalu",r:"Pacific Islands",co:"Oceania",i:true,ll:false,p:11e3,f:"🇹🇻",cl:["blue","yellow","white"],lang:"germanic",cur:"other",climate:"tropical"},
+  {n:"France",co:"Europe",i:false,ll:false,p:68e6,f:"🇫🇷",cl:["blue","white","red"],lang:"romance",climate:"temperate"},
+  {n:"Germany",co:"Europe",i:false,ll:false,p:83e6,f:"🇩🇪",cl:["black","red","gold"],lang:"germanic",climate:"temperate"},
+  {n:"Netherlands",co:"Europe",i:false,ll:false,p:17e6,f:"🇳🇱",cl:["red","white","blue"],lang:"germanic",climate:"temperate"},
+  {n:"Belgium",co:"Europe",i:false,ll:false,p:11.5e6,f:"🇧🇪",cl:["black","yellow","red"],lang:"germanic",climate:"temperate"},
+  {n:"Luxembourg",co:"Europe",i:false,ll:true,p:660e3,f:"🇱🇺",cl:["red","white","blue"],lang:"romance",climate:"temperate"},
+  {n:"Switzerland",co:"Europe",i:false,ll:true,p:8.6e6,f:"🇨🇭",cl:["red","white"],lang:"germanic",climate:"temperate"},
+  {n:"Austria",co:"Europe",i:false,ll:true,p:9e6,f:"🇦🇹",cl:["red","white"],lang:"germanic",climate:"temperate"},
+  {n:"Liechtenstein",co:"Europe",i:false,ll:true,p:38e3,f:"🇱🇮",cl:["blue","red","gold"],lang:"germanic",climate:"temperate"},
+  {n:"Italy",co:"Europe",i:false,ll:false,p:60e6,f:"🇮🇹",cl:["green","white","red"],lang:"romance",climate:"mediterranean"},
+  {n:"Spain",co:"Europe",i:false,ll:false,p:47e6,f:"🇪🇸",cl:["red","yellow"],lang:"romance",climate:"mediterranean"},
+  {n:"Portugal",co:"Europe",i:false,ll:false,p:10e6,f:"🇵🇹",cl:["green","red","yellow"],lang:"romance",climate:"mediterranean"},
+  {n:"Greece",co:"Europe",i:false,ll:false,p:10e6,f:"🇬🇷",cl:["blue","white"],lang:"other",climate:"mediterranean"},
+  {n:"Croatia",co:"Europe",i:false,ll:false,p:4e6,f:"🇭🇷",cl:["red","white","blue"],lang:"slavic",climate:"mediterranean"},
+  {n:"Slovenia",co:"Europe",i:false,ll:false,p:2.1e6,f:"🇸🇮",cl:["white","blue","red"],lang:"slavic",climate:"temperate"},
+  {n:"Bosnia",co:"Europe",i:false,ll:false,p:3.3e6,f:"🇧🇦",cl:["blue","yellow","white"],lang:"slavic",climate:"temperate"},
+  {n:"Montenegro",co:"Europe",i:false,ll:false,p:620e3,f:"🇲🇪",cl:["red","gold"],lang:"slavic",climate:"mediterranean"},
+  {n:"Albania",co:"Europe",i:false,ll:false,p:2.8e6,f:"🇦🇱",cl:["red","black"],lang:"other",climate:"mediterranean"},
+  {n:"North Macedonia",co:"Europe",i:false,ll:true,p:2.1e6,f:"🇲🇰",cl:["red","yellow"],lang:"slavic",climate:"temperate"},
+  {n:"Serbia",co:"Europe",i:false,ll:true,p:7e6,f:"🇷🇸",cl:["red","blue","white"],lang:"slavic",climate:"temperate"},
+  {n:"Kosovo",co:"Europe",i:false,ll:true,p:1.8e6,f:"🇽🇰",cl:["blue","yellow","white"],lang:"other",climate:"temperate"},
+  {n:"Malta",co:"Europe",i:true,ll:false,p:525e3,f:"🇲🇹",cl:["white","red"],lang:"other",climate:"mediterranean"},
+  {n:"Cyprus",co:"Europe",i:true,ll:false,p:1.2e6,f:"🇨🇾",cl:["white","orange","green"],lang:"other",climate:"mediterranean"},
+  {n:"Sweden",co:"Europe",i:false,ll:false,p:10e6,f:"🇸🇪",cl:["blue","yellow"],lang:"germanic",climate:"temperate"},
+  {n:"Norway",co:"Europe",i:false,ll:false,p:5.4e6,f:"🇳🇴",cl:["red","white","blue"],lang:"germanic",climate:"temperate"},
+  {n:"Finland",co:"Europe",i:false,ll:false,p:5.5e6,f:"🇫🇮",cl:["white","blue"],lang:"other",climate:"temperate"},
+  {n:"Denmark",co:"Europe",i:false,ll:false,p:5.9e6,f:"🇩🇰",cl:["red","white"],lang:"germanic",climate:"temperate"},
+  {n:"Iceland",co:"Europe",i:true,ll:false,p:370e3,f:"🇮🇸",cl:["blue","white","red"],lang:"germanic",climate:"temperate"},
+  {n:"Poland",co:"Europe",i:false,ll:false,p:38e6,f:"🇵🇱",cl:["white","red"],lang:"slavic",climate:"temperate"},
+  {n:"Romania",co:"Europe",i:false,ll:false,p:19e6,f:"🇷🇴",cl:["blue","yellow","red"],lang:"romance",climate:"temperate"},
+  {n:"Ukraine",co:"Europe",i:false,ll:false,p:44e6,f:"🇺🇦",cl:["blue","yellow"],lang:"slavic",climate:"temperate"},
+  {n:"Bulgaria",co:"Europe",i:false,ll:false,p:6.5e6,f:"🇧🇬",cl:["white","green","red"],lang:"slavic",climate:"temperate"},
+  {n:"Hungary",co:"Europe",i:false,ll:true,p:9.7e6,f:"🇭🇺",cl:["red","white","green"],lang:"other",climate:"temperate"},
+  {n:"Czech Republic",co:"Europe",i:false,ll:true,p:10.7e6,f:"🇨🇿",cl:["white","red","blue"],lang:"slavic",climate:"temperate"},
+  {n:"Slovakia",co:"Europe",i:false,ll:true,p:5.5e6,f:"🇸🇰",cl:["white","blue","red"],lang:"slavic",climate:"temperate"},
+  {n:"Moldova",co:"Europe",i:false,ll:true,p:2.6e6,f:"🇲🇩",cl:["blue","yellow","red"],lang:"romance",climate:"temperate"},
+  {n:"Belarus",co:"Europe",i:false,ll:true,p:9.4e6,f:"🇧🇾",cl:["red","green","white"],lang:"slavic",climate:"temperate"},
+  {n:"Georgia",co:"Europe",i:false,ll:false,p:3.7e6,f:"🇬🇪",cl:["white","red"],lang:"other",climate:"temperate"},
+  {n:"Armenia",co:"Europe",i:false,ll:true,p:3e6,f:"🇦🇲",cl:["red","blue","orange"],lang:"other",climate:"temperate"},
+  {n:"Azerbaijan",co:"Europe",i:false,ll:false,p:10e6,f:"🇦🇿",cl:["blue","red","green","white"],lang:"other",climate:"temperate"},
+  {n:"United Kingdom",co:"Europe",i:true,ll:false,p:67e6,f:"🇬🇧",cl:["blue","red","white"],lang:"germanic",climate:"temperate"},
+  {n:"Ireland",co:"Europe",i:true,ll:false,p:5e6,f:"🇮🇪",cl:["green","white","orange"],lang:"germanic",climate:"temperate"},
+  {n:"Japan",co:"Asia",i:true,ll:false,p:125e6,f:"🇯🇵",cl:["white","red"],lang:"other",climate:"temperate"},
+  {n:"China",co:"Asia",i:false,ll:false,p:1400e6,f:"🇨🇳",cl:["red","yellow"],lang:"other",climate:"varied"},
+  {n:"South Korea",co:"Asia",i:false,ll:false,p:52e6,f:"🇰🇷",cl:["white","red","blue","black"],lang:"other",climate:"temperate"},
+  {n:"North Korea",co:"Asia",i:false,ll:false,p:25e6,f:"🇰🇵",cl:["red","white","blue"],lang:"other",climate:"temperate"},
+  {n:"Mongolia",co:"Asia",i:false,ll:true,p:3.3e6,f:"🇲🇳",cl:["red","blue","yellow"],lang:"other",climate:"arid"},
+  {n:"Taiwan",co:"Asia",i:true,ll:false,p:23e6,f:"🇹🇼",cl:["red","blue","white"],lang:"other",climate:"tropical"},
+  {n:"Indonesia",co:"Asia",i:true,ll:false,p:270e6,f:"🇮🇩",cl:["red","white"],lang:"other",climate:"tropical"},
+  {n:"Philippines",co:"Asia",i:true,ll:false,p:110e6,f:"🇵🇭",cl:["blue","red","white","yellow"],lang:"other",climate:"tropical"},
+  {n:"Thailand",co:"Asia",i:false,ll:false,p:70e6,f:"🇹🇭",cl:["red","white","blue"],lang:"other",climate:"tropical"},
+  {n:"Vietnam",co:"Asia",i:false,ll:false,p:97e6,f:"🇻🇳",cl:["red","yellow"],lang:"other",climate:"tropical"},
+  {n:"Malaysia",co:"Asia",i:false,ll:false,p:32e6,f:"🇲🇾",cl:["red","white","blue","yellow"],lang:"other",climate:"tropical"},
+  {n:"Myanmar",co:"Asia",i:false,ll:false,p:54e6,f:"🇲🇲",cl:["yellow","green","red","white"],lang:"other",climate:"tropical"},
+  {n:"Cambodia",co:"Asia",i:false,ll:false,p:16e6,f:"🇰🇭",cl:["red","blue","white"],lang:"other",climate:"tropical"},
+  {n:"Singapore",co:"Asia",i:true,ll:false,p:5.8e6,f:"🇸🇬",cl:["red","white"],lang:"other",climate:"tropical"},
+  {n:"Laos",co:"Asia",i:false,ll:true,p:7e6,f:"🇱🇦",cl:["red","blue","white"],lang:"other",climate:"tropical"},
+  {n:"Timor-Leste",co:"Asia",i:true,ll:false,p:1.3e6,f:"🇹🇱",cl:["red","black","yellow","white"],lang:"romance",climate:"tropical"},
+  {n:"Brunei",co:"Asia",i:false,ll:false,p:440e3,f:"🇧🇳",cl:["yellow","white","black"],lang:"other",climate:"tropical"},
+  {n:"India",co:"Asia",i:false,ll:false,p:1380e6,f:"🇮🇳",cl:["orange","white","green","blue"],lang:"other",climate:"varied"},
+  {n:"Pakistan",co:"Asia",i:false,ll:false,p:220e6,f:"🇵🇰",cl:["green","white"],lang:"other",climate:"arid"},
+  {n:"Bangladesh",co:"Asia",i:false,ll:false,p:165e6,f:"🇧🇩",cl:["green","red"],lang:"other",climate:"tropical"},
+  {n:"Sri Lanka",co:"Asia",i:true,ll:false,p:21e6,f:"🇱🇰",cl:["red","orange","green","yellow"],lang:"other",climate:"tropical"},
+  {n:"Nepal",co:"Asia",i:false,ll:true,p:29e6,f:"🇳🇵",cl:["red","blue","white"],lang:"other",climate:"varied"},
+  {n:"Maldives",co:"Asia",i:true,ll:false,p:540e3,f:"🇲🇻",cl:["red","green","white"],lang:"other",climate:"tropical"},
+  {n:"Bhutan",co:"Asia",i:false,ll:true,p:780e3,f:"🇧🇹",cl:["orange","red","yellow","white"],lang:"other",climate:"varied"},
+  {n:"Kazakhstan",co:"Asia",i:false,ll:true,p:19e6,f:"🇰🇿",cl:["blue","yellow"],lang:"other",climate:"arid"},
+  {n:"Uzbekistan",co:"Asia",i:false,ll:true,p:34e6,f:"🇺🇿",cl:["blue","white","green"],lang:"other",climate:"arid"},
+  {n:"Kyrgyzstan",co:"Asia",i:false,ll:true,p:6.5e6,f:"🇰🇬",cl:["red","yellow"],lang:"other",climate:"arid"},
+  {n:"Tajikistan",co:"Asia",i:false,ll:true,p:9.5e6,f:"🇹🇯",cl:["red","white","green"],lang:"other",climate:"arid"},
+  {n:"Turkmenistan",co:"Asia",i:false,ll:true,p:6e6,f:"🇹🇲",cl:["green","white","red"],lang:"other",climate:"arid"},
+  {n:"Afghanistan",co:"Asia",i:false,ll:true,p:38e6,f:"🇦🇫",cl:["black","red","green","white"],lang:"other",climate:"arid"},
+  {n:"Saudi Arabia",co:"Asia",i:false,ll:false,p:35e6,f:"🇸🇦",cl:["green","white"],lang:"arabic",climate:"arid"},
+  {n:"Iran",co:"Asia",i:false,ll:false,p:84e6,f:"🇮🇷",cl:["green","white","red"],lang:"other",climate:"arid"},
+  {n:"Iraq",co:"Asia",i:false,ll:false,p:40e6,f:"🇮🇶",cl:["red","white","black","green"],lang:"arabic",climate:"arid"},
+  {n:"Turkey",co:"Asia",i:false,ll:false,p:84e6,f:"🇹🇷",cl:["red","white"],lang:"other",climate:"mediterranean"},
+  {n:"Israel",co:"Asia",i:false,ll:false,p:9e6,f:"🇮🇱",cl:["white","blue"],lang:"other",climate:"mediterranean"},
+  {n:"Jordan",co:"Asia",i:false,ll:false,p:10e6,f:"🇯🇴",cl:["black","white","green","red"],lang:"arabic",climate:"arid"},
+  {n:"Lebanon",co:"Asia",i:false,ll:false,p:5.2e6,f:"🇱🇧",cl:["red","white","green"],lang:"arabic",climate:"mediterranean"},
+  {n:"UAE",co:"Asia",i:false,ll:false,p:9.9e6,f:"🇦🇪",cl:["red","green","white","black"],lang:"arabic",climate:"arid"},
+  {n:"Qatar",co:"Asia",i:false,ll:false,p:2.8e6,f:"🇶🇦",cl:["red","white"],lang:"arabic",climate:"arid"},
+  {n:"Kuwait",co:"Asia",i:false,ll:false,p:4.3e6,f:"🇰🇼",cl:["green","white","red","black"],lang:"arabic",climate:"arid"},
+  {n:"Oman",co:"Asia",i:false,ll:false,p:4.5e6,f:"🇴🇲",cl:["red","white","green"],lang:"arabic",climate:"arid"},
+  {n:"Yemen",co:"Asia",i:false,ll:false,p:33e6,f:"🇾🇪",cl:["red","white","black"],lang:"arabic",climate:"arid"},
+  {n:"Syria",co:"Asia",i:false,ll:false,p:21e6,f:"🇸🇾",cl:["red","white","black","green"],lang:"arabic",climate:"arid"},
+  {n:"Bahrain",co:"Asia",i:true,ll:false,p:1.7e6,f:"🇧🇭",cl:["red","white"],lang:"arabic",climate:"arid"},
+  {n:"Nigeria",co:"Africa",i:false,ll:false,p:211e6,f:"🇳🇬",cl:["green","white"],lang:"other",climate:"tropical"},
+  {n:"Ethiopia",co:"Africa",i:false,ll:true,p:120e6,f:"🇪🇹",cl:["green","yellow","red","blue"],lang:"other",climate:"tropical"},
+  {n:"Egypt",co:"Africa",i:false,ll:false,p:102e6,f:"🇪🇬",cl:["red","white","black"],lang:"arabic",climate:"arid"},
+  {n:"DR Congo",co:"Africa",i:false,ll:false,p:90e6,f:"🇨🇩",cl:["blue","red","yellow"],lang:"romance",climate:"tropical"},
+  {n:"Tanzania",co:"Africa",i:false,ll:false,p:61e6,f:"🇹🇿",cl:["green","black","yellow","blue"],lang:"other",climate:"tropical"},
+  {n:"South Africa",co:"Africa",i:false,ll:false,p:60e6,f:"🇿🇦",cl:["green","black","yellow","red","white","blue"],lang:"germanic",climate:"temperate"},
+  {n:"Kenya",co:"Africa",i:false,ll:false,p:54e6,f:"🇰🇪",cl:["black","red","green","white"],lang:"other",climate:"tropical"},
+  {n:"Algeria",co:"Africa",i:false,ll:false,p:44e6,f:"🇩🇿",cl:["green","white","red"],lang:"arabic",climate:"arid"},
+  {n:"Uganda",co:"Africa",i:false,ll:true,p:47e6,f:"🇺🇬",cl:["black","yellow","red","white"],lang:"other",climate:"tropical"},
+  {n:"Sudan",co:"Africa",i:false,ll:false,p:45e6,f:"🇸🇩",cl:["red","white","black","green"],lang:"arabic",climate:"arid"},
+  {n:"Morocco",co:"Africa",i:false,ll:false,p:37e6,f:"🇲🇦",cl:["red","green"],lang:"arabic",climate:"mediterranean"},
+  {n:"Angola",co:"Africa",i:false,ll:false,p:33e6,f:"🇦🇴",cl:["red","black","yellow"],lang:"romance",climate:"tropical"},
+  {n:"Ghana",co:"Africa",i:false,ll:false,p:32e6,f:"🇬🇭",cl:["red","yellow","green","black"],lang:"germanic",climate:"tropical"},
+  {n:"Mozambique",co:"Africa",i:false,ll:false,p:32e6,f:"🇲🇿",cl:["green","yellow","black","red","white"],lang:"romance",climate:"tropical"},
+  {n:"Cameroon",co:"Africa",i:false,ll:false,p:27e6,f:"🇨🇲",cl:["green","red","yellow"],lang:"romance",climate:"tropical"},
+  {n:"Ivory Coast",co:"Africa",i:false,ll:false,p:26e6,f:"🇨🇮",cl:["orange","white","green"],lang:"romance",climate:"tropical"},
+  {n:"Niger",co:"Africa",i:false,ll:true,p:24e6,f:"🇳🇪",cl:["orange","white","green"],lang:"romance",climate:"arid"},
+  {n:"Mali",co:"Africa",i:false,ll:true,p:22e6,f:"🇲🇱",cl:["green","yellow","red"],lang:"romance",climate:"arid"},
+  {n:"Burkina Faso",co:"Africa",i:false,ll:true,p:22e6,f:"🇧🇫",cl:["red","green","yellow"],lang:"romance",climate:"arid"},
+  {n:"Zambia",co:"Africa",i:false,ll:true,p:19e6,f:"🇿🇲",cl:["green","red","black","orange"],lang:"germanic",climate:"tropical"},
+  {n:"Senegal",co:"Africa",i:false,ll:false,p:17e6,f:"🇸🇳",cl:["green","yellow","red"],lang:"romance",climate:"tropical"},
+  {n:"Somalia",co:"Africa",i:false,ll:false,p:16e6,f:"🇸🇴",cl:["blue","white"],lang:"arabic",climate:"arid"},
+  {n:"Zimbabwe",co:"Africa",i:false,ll:true,p:15e6,f:"🇿🇼",cl:["green","yellow","red","black","white"],lang:"germanic",climate:"tropical"},
+  {n:"Guinea",co:"Africa",i:false,ll:false,p:13e6,f:"🇬🇳",cl:["red","yellow","green"],lang:"romance",climate:"tropical"},
+  {n:"Rwanda",co:"Africa",i:false,ll:true,p:13e6,f:"🇷🇼",cl:["blue","yellow","green"],lang:"other",climate:"tropical"},
+  {n:"Tunisia",co:"Africa",i:false,ll:false,p:12e6,f:"🇹🇳",cl:["red","white"],lang:"arabic",climate:"mediterranean"},
+  {n:"Benin",co:"Africa",i:false,ll:false,p:12e6,f:"🇧🇯",cl:["yellow","red","green"],lang:"romance",climate:"tropical"},
+  {n:"Madagascar",co:"Africa",i:true,ll:false,p:28e6,f:"🇲🇬",cl:["white","red","green"],lang:"other",climate:"tropical"},
+  {n:"Libya",co:"Africa",i:false,ll:false,p:7e6,f:"🇱🇾",cl:["black","red","green","white"],lang:"arabic",climate:"arid"},
+  {n:"Togo",co:"Africa",i:false,ll:false,p:8e6,f:"🇹🇬",cl:["green","yellow","red","white"],lang:"romance",climate:"tropical"},
+  {n:"Malawi",co:"Africa",i:false,ll:true,p:19e6,f:"🇲🇼",cl:["black","red","green","white"],lang:"germanic",climate:"tropical"},
+  {n:"Namibia",co:"Africa",i:false,ll:false,p:2.6e6,f:"🇳🇦",cl:["blue","red","green","yellow","white"],lang:"germanic",climate:"arid"},
+  {n:"Botswana",co:"Africa",i:false,ll:true,p:2.6e6,f:"🇧🇼",cl:["blue","black","white"],lang:"germanic",climate:"arid"},
+  {n:"Lesotho",co:"Africa",i:false,ll:true,p:2.1e6,f:"🇱🇸",cl:["blue","white","green","black"],lang:"other",climate:"temperate"},
+  {n:"Eswatini",co:"Africa",i:false,ll:true,p:1.2e6,f:"🇸🇿",cl:["blue","yellow","red","black"],lang:"other",climate:"temperate"},
+  {n:"Eritrea",co:"Africa",i:false,ll:false,p:3.5e6,f:"🇪🇷",cl:["green","red","blue","yellow"],lang:"other",climate:"arid"},
+  {n:"Djibouti",co:"Africa",i:false,ll:false,p:990e3,f:"🇩🇯",cl:["blue","green","white","red"],lang:"arabic",climate:"arid"},
+  {n:"Cape Verde",co:"Africa",i:true,ll:false,p:560e3,f:"🇨🇻",cl:["blue","white","red","yellow"],lang:"romance",climate:"tropical"},
+  {n:"United States",co:"North America",i:false,ll:false,p:331e6,f:"🇺🇸",cl:["red","white","blue"],lang:"germanic",climate:"varied"},
+  {n:"Canada",co:"North America",i:false,ll:false,p:38e6,f:"🇨🇦",cl:["red","white"],lang:"germanic",climate:"temperate"},
+  {n:"Mexico",co:"North America",i:false,ll:false,p:128e6,f:"🇲🇽",cl:["green","white","red"],lang:"romance",climate:"varied"},
+  {n:"Cuba",co:"North America",i:true,ll:false,p:11e6,f:"🇨🇺",cl:["blue","white","red"],lang:"romance",climate:"tropical"},
+  {n:"Jamaica",co:"North America",i:true,ll:false,p:2.96e6,f:"🇯🇲",cl:["black","green","yellow"],lang:"germanic",climate:"tropical"},
+  {n:"Haiti",co:"North America",i:true,ll:false,p:11e6,f:"🇭🇹",cl:["blue","red"],lang:"romance",climate:"tropical"},
+  {n:"Dominican Republic",co:"North America",i:true,ll:false,p:10.8e6,f:"🇩🇴",cl:["blue","red","white"],lang:"romance",climate:"tropical"},
+  {n:"Guatemala",co:"North America",i:false,ll:false,p:17e6,f:"🇬🇹",cl:["blue","white"],lang:"romance",climate:"tropical"},
+  {n:"Honduras",co:"North America",i:false,ll:false,p:10e6,f:"🇭🇳",cl:["blue","white"],lang:"romance",climate:"tropical"},
+  {n:"Costa Rica",co:"North America",i:false,ll:false,p:5.1e6,f:"🇨🇷",cl:["blue","white","red"],lang:"romance",climate:"tropical"},
+  {n:"Panama",co:"North America",i:false,ll:false,p:4.3e6,f:"🇵🇦",cl:["red","white","blue"],lang:"romance",climate:"tropical"},
+  {n:"Trinidad and Tobago",co:"North America",i:true,ll:false,p:1.4e6,f:"🇹🇹",cl:["red","white","black"],lang:"germanic",climate:"tropical"},
+  {n:"Bahamas",co:"North America",i:true,ll:false,p:390e3,f:"🇧🇸",cl:["blue","black","yellow"],lang:"germanic",climate:"tropical"},
+  {n:"Barbados",co:"North America",i:true,ll:false,p:287e3,f:"🇧🇧",cl:["blue","yellow","black"],lang:"germanic",climate:"tropical"},
+  {n:"Belize",co:"North America",i:false,ll:false,p:400e3,f:"🇧🇿",cl:["blue","red","white"],lang:"germanic",climate:"tropical"},
+  {n:"Brazil",co:"South America",i:false,ll:false,p:213e6,f:"🇧🇷",cl:["green","yellow","blue","white"],lang:"romance",climate:"tropical"},
+  {n:"Argentina",co:"South America",i:false,ll:false,p:45e6,f:"🇦🇷",cl:["blue","white","yellow"],lang:"romance",climate:"temperate"},
+  {n:"Colombia",co:"South America",i:false,ll:false,p:51e6,f:"🇨🇴",cl:["yellow","blue","red"],lang:"romance",climate:"tropical"},
+  {n:"Peru",co:"South America",i:false,ll:false,p:33e6,f:"🇵🇪",cl:["red","white"],lang:"romance",climate:"varied"},
+  {n:"Chile",co:"South America",i:false,ll:false,p:19e6,f:"🇨🇱",cl:["red","white","blue","yellow"],lang:"romance",climate:"varied"},
+  {n:"Venezuela",co:"South America",i:false,ll:false,p:28e6,f:"🇻🇪",cl:["yellow","blue","red"],lang:"romance",climate:"tropical"},
+  {n:"Ecuador",co:"South America",i:false,ll:false,p:18e6,f:"🇪🇨",cl:["yellow","blue","red"],lang:"romance",climate:"tropical"},
+  {n:"Uruguay",co:"South America",i:false,ll:false,p:3.5e6,f:"🇺🇾",cl:["white","blue","yellow"],lang:"romance",climate:"temperate"},
+  {n:"Bolivia",co:"South America",i:false,ll:true,p:12e6,f:"🇧🇴",cl:["red","yellow","green"],lang:"romance",climate:"varied"},
+  {n:"Paraguay",co:"South America",i:false,ll:true,p:7.3e6,f:"🇵🇾",cl:["red","white","blue"],lang:"romance",climate:"tropical"},
+  {n:"Guyana",co:"South America",i:false,ll:false,p:790e3,f:"🇬🇾",cl:["green","yellow","red","white","black"],lang:"germanic",climate:"tropical"},
+  {n:"Suriname",co:"South America",i:false,ll:false,p:590e3,f:"🇸🇷",cl:["green","white","red","yellow"],lang:"germanic",climate:"tropical"},
+  {n:"Australia",co:"Oceania",i:true,ll:false,p:25e6,f:"🇦🇺",cl:["blue","red","white"],lang:"germanic",climate:"varied"},
+  {n:"New Zealand",co:"Oceania",i:true,ll:false,p:5e6,f:"🇳🇿",cl:["blue","red","white"],lang:"germanic",climate:"temperate"},
+  {n:"Papua New Guinea",co:"Oceania",i:true,ll:false,p:9e6,f:"🇵🇬",cl:["black","red","yellow","white"],lang:"germanic",climate:"tropical"},
+  {n:"Fiji",co:"Oceania",i:true,ll:false,p:930e3,f:"🇫🇯",cl:["blue","white","red","yellow"],lang:"germanic",climate:"tropical"},
+  {n:"Vanuatu",co:"Oceania",i:true,ll:false,p:307e3,f:"🇻🇺",cl:["black","red","green","yellow"],lang:"romance",climate:"tropical"},
+  {n:"Samoa",co:"Oceania",i:true,ll:false,p:220e3,f:"🇼🇸",cl:["red","white","blue"],lang:"germanic",climate:"tropical"},
+  {n:"Tonga",co:"Oceania",i:true,ll:false,p:100e3,f:"🇹🇴",cl:["red","white"],lang:"other",climate:"tropical"},
+  {n:"Solomon Islands",co:"Oceania",i:true,ll:false,p:690e3,f:"🇸🇧",cl:["blue","green","yellow","white"],lang:"germanic",climate:"tropical"},
+  {n:"Kiribati",co:"Oceania",i:true,ll:false,p:120e3,f:"🇰🇮",cl:["red","white","blue","yellow"],lang:"germanic",climate:"tropical"},
+  {n:"Micronesia",co:"Oceania",i:true,ll:false,p:115e3,f:"🇫🇲",cl:["blue","white"],lang:"germanic",climate:"tropical"},
+  {n:"Palau",co:"Oceania",i:true,ll:false,p:18e3,f:"🇵🇼",cl:["blue","yellow"],lang:"germanic",climate:"tropical"},
+  {n:"Nauru",co:"Oceania",i:true,ll:false,p:10e3,f:"🇳🇷",cl:["blue","yellow","white"],lang:"germanic",climate:"tropical"},
+  {n:"Tuvalu",co:"Oceania",i:true,ll:false,p:11e3,f:"🇹🇻",cl:["blue","yellow","white"],lang:"germanic",climate:"tropical"},
 ];
 
+// g = group tag — board generator ensures no two same-group cats on same axis
 const CATS=[
-  // Continent
-  {id:"europe",    lb:"In Europe",             t:c=>c.co==="Europe"},
-  {id:"asia",      lb:"In Asia",               t:c=>c.co==="Asia"},
-  {id:"africa",    lb:"In Africa",             t:c=>c.co==="Africa"},
-  {id:"sam",       lb:"In South America",      t:c=>c.co==="South America"},
-  {id:"nam",       lb:"In North America",      t:c=>c.co==="North America"},
-  {id:"oceania",   lb:"In Oceania",            t:c=>c.co==="Oceania"},
-  // Region
-  {id:"scand",     lb:"In Scandinavia",        t:c=>c.r==="Scandinavia"},
-  {id:"weur",      lb:"In Western Europe",     t:c=>c.r==="Western Europe"},
-  {id:"seur",      lb:"In Southern Europe",    t:c=>c.r==="Southern Europe"},
-  {id:"eeur",      lb:"In Eastern Europe",     t:c=>c.r==="Eastern Europe"},
-  {id:"balkans",   lb:"In the Balkans",        t:c=>c.r==="Balkans"},
-  {id:"caucasus",  lb:"In the Caucasus",       t:c=>c.r==="Caucasus"},
-  {id:"brit",      lb:"In the British Isles",  t:c=>c.r==="British Isles"},
-  {id:"seas",      lb:"In Southeast Asia",     t:c=>c.r==="Southeast Asia"},
-  {id:"eas",       lb:"In East Asia",          t:c=>c.r==="East Asia"},
-  {id:"sas",       lb:"In South Asia",         t:c=>c.r==="South Asia"},
-  {id:"cas",       lb:"In Central Asia",       t:c=>c.r==="Central Asia"},
-  {id:"me",        lb:"In the Middle East",    t:c=>c.r==="Middle East"},
-  {id:"carib",     lb:"In the Caribbean",      t:c=>c.r==="Caribbean"},
-  {id:"cam",       lb:"In Central America",    t:c=>c.r==="Central America"},
-  {id:"nafrica",   lb:"In North Africa",       t:c=>c.r==="North Africa"},
-  {id:"wafrica",   lb:"In West Africa",        t:c=>c.r==="West Africa"},
-  {id:"eafrica",   lb:"In East Africa",        t:c=>c.r==="East Africa"},
-  {id:"safrica",   lb:"In Southern Africa",    t:c=>c.r==="Southern Africa"},
-  {id:"pacific",   lb:"In the Pacific Islands",t:c=>c.r==="Pacific Islands"},
-  // Geography
-  {id:"island",    lb:"Island nation",         t:c=>c.i},
-  {id:"ll",        lb:"Landlocked",            t:c=>c.ll},
-  {id:"coast",     lb:"Has a coastline",       t:c=>!c.i&&!c.ll},
-  // Population
-  {id:"p100",      lb:"Population 100M+",      t:c=>c.p>=100e6},
-  {id:"p1050",     lb:"Population 10M–50M",    t:c=>c.p>=10e6&&c.p<50e6},
-  {id:"p5",        lb:"Population 5M–10M",     t:c=>c.p>=5e6&&c.p<10e6},
-  {id:"p1",        lb:"Population under 1M",   t:c=>c.p<1e6},
-  // Flag
-  {id:"fred",      lb:"Flag has red",          t:c=>c.cl.includes("red")||c.cl.includes("maroon")},
-  {id:"fblue",     lb:"Flag has blue",         t:c=>c.cl.includes("blue")},
-  {id:"fgreen",    lb:"Flag has green",        t:c=>c.cl.includes("green")},
-  {id:"fyellow",   lb:"Flag has yellow/gold",  t:c=>c.cl.includes("yellow")||c.cl.includes("gold")||c.cl.includes("orange")},
-  {id:"fwhite",    lb:"Flag has white",        t:c=>c.cl.includes("white")},
-  {id:"fblack",    lb:"Flag has black",        t:c=>c.cl.includes("black")},
-  {id:"fnowhite",  lb:"Flag has no white",     t:c=>!c.cl.includes("white")},
-  // Language family
-  {id:"romance",   lb:"Romance language",      t:c=>c.lang==="romance"},
-  {id:"germanic",  lb:"Germanic language",     t:c=>c.lang==="germanic"},
-  {id:"slavic",    lb:"Slavic language",       t:c=>c.lang==="slavic"},
-  {id:"arabic",    lb:"Arabic speaking",       t:c=>c.lang==="arabic"},
-  {id:"turkic",    lb:"Turkic language",       t:c=>c.lang==="turkic"},
-  // Currency
-  {id:"euro",      lb:"Uses the Euro",         t:c=>c.cur==="euro"},
-  // Climate
-  {id:"tropical",  lb:"Tropical climate",      t:c=>c.climate==="tropical"},
-  {id:"arid",      lb:"Arid / desert climate", t:c=>c.climate==="arid"},
-  {id:"mediter",   lb:"Mediterranean climate", t:c=>c.climate==="mediterranean"},
-  {id:"temperate", lb:"Temperate climate",     t:c=>c.climate==="temperate"},
+  {id:"europe",   lb:"In Europe",           t:c=>c.co==="Europe",        g:"continent"},
+  {id:"asia",     lb:"In Asia",             t:c=>c.co==="Asia",          g:"continent"},
+  {id:"africa",   lb:"In Africa",           t:c=>c.co==="Africa",        g:"continent"},
+  {id:"sam",      lb:"In South America",    t:c=>c.co==="South America", g:"continent"},
+  {id:"nam",      lb:"In North America",    t:c=>c.co==="North America", g:"continent"},
+  {id:"oceania",  lb:"In Oceania",          t:c=>c.co==="Oceania",       g:"continent"},
+  {id:"island",   lb:"Island nation",       t:c=>c.i,                    g:"geo"},
+  {id:"ll",       lb:"Landlocked",          t:c=>c.ll,                   g:"geo"},
+  {id:"coast",    lb:"Has a coastline",     t:c=>!c.i&&!c.ll,            g:"geo"},
+  {id:"p100",     lb:"Population over 100M",t:c=>c.p>=100e6,             g:"pop"},
+  {id:"p1050",    lb:"Population 10–100M",  t:c=>c.p>=10e6&&c.p<100e6,  g:"pop"},
+  {id:"p110",     lb:"Population 1M–10M",   t:c=>c.p>=1e6&&c.p<10e6,    g:"pop"},
+  {id:"p1",       lb:"Population under 1M", t:c=>c.p<1e6,                g:"pop"},
+  {id:"fred",     lb:"Flag has red",        t:c=>c.cl.includes("red"),   g:"flag"},
+  {id:"fblue",    lb:"Flag has blue",       t:c=>c.cl.includes("blue"),  g:"flag"},
+  {id:"fgreen",   lb:"Flag has green",      t:c=>c.cl.includes("green"), g:"flag"},
+  {id:"fyellow",  lb:"Flag has yellow",     t:c=>c.cl.includes("yellow")||c.cl.includes("gold")||c.cl.includes("orange"),g:"flag"},
+  {id:"fwhite",   lb:"Flag has white",      t:c=>c.cl.includes("white"), g:"flag"},
+  {id:"fblack",   lb:"Flag has black",      t:c=>c.cl.includes("black"), g:"flag"},
+  {id:"romance",  lb:"Romance language",    t:c=>c.lang==="romance",     g:"lang"},
+  {id:"germanic", lb:"Germanic language",   t:c=>c.lang==="germanic",    g:"lang"},
+  {id:"slavic",   lb:"Slavic language",     t:c=>c.lang==="slavic",      g:"lang"},
+  {id:"arabic",   lb:"Arabic speaking",     t:c=>c.lang==="arabic",      g:"lang"},
+  {id:"tropical", lb:"Tropical climate",    t:c=>c.climate==="tropical", g:"climate"},
+  {id:"arid",     lb:"Arid / desert",       t:c=>c.climate==="arid",     g:"climate"},
+  {id:"mediter",  lb:"Mediterranean climate",t:c=>c.climate==="mediterranean",g:"climate"},
+  {id:"temperate",lb:"Temperate climate",   t:c=>c.climate==="temperate",g:"climate"},
 ];
 
-let board=null,sel=null;
+// Banned pairs — combos with fewer than 3 valid countries
+const BANNED=new Set([
+  "oceania|ll","ll|oceania","oceania|arabic","arabic|oceania",
+  "oceania|slavic","slavic|oceania","oceania|arid","arid|oceania",
+  "oceania|mediter","mediter|oceania","sam|ll","ll|sam",
+  "sam|island","island|sam","nam|ll","ll|nam",
+  "slavic|africa","africa|slavic","slavic|sam","sam|slavic",
+  "slavic|nam","nam|slavic","slavic|oceania","oceania|slavic",
+  "arabic|europe","europe|arabic","arabic|sam","sam|arabic",
+  "arabic|nam","nam|arabic","arabic|oceania","oceania|arabic",
+  "germanic|asia","asia|germanic","germanic|sam","sam|germanic",
+  "p100|oceania","oceania|p100","p100|sam","sam|p100",
+  "p100|nam","nam|p100","p100|europe","europe|p100",
+  "p1|europe","europe|p1","p1|sam","sam|p1",
+  "p1|nam","nam|p1",
+  "romance|arid","arid|romance",
+  "slavic|arid","arid|slavic","slavic|tropical","tropical|slavic",
+  "slavic|mediter","mediter|slavic",
+]);
+
+function pairOk(a,b){return !BANNED.has(a.id+"|"+b.id)}
+
+let board=null,sel=null,hintUsed=false,hintCellIdx=null,hintCountry=null;
+
 function valid(r,c){return C.filter(x=>r.t(x)&&c.t(x))}
+
 function genBoard(){
-  for(let t=0;t<400;t++){
+  for(let t=0;t<600;t++){
     let sh=[...CATS].sort(()=>Math.random()-.5);
-    let rows=sh.slice(0,3),cols=sh.slice(3,6),ok=true;
-    for(let r of rows){for(let c of cols){if(valid(r,c).length<2){ok=false;break}}if(!ok)break}
-    if(ok)return{rows,cols}
-  }return null
+    let rows=[],cols=[];
+    for(let cat of sh){
+      if(rows.length<3)rows.push(cat);
+      else if(cols.length<3)cols.push(cat);
+      else break;
+    }
+    if(new Set(rows.map(r=>r.g)).size<3)continue;
+    if(new Set(cols.map(c=>c.g)).size<3)continue;
+    let ok=true;
+    for(let r of rows){
+      for(let c of cols){
+        if(!pairOk(r,c)||valid(r,c).length<3){ok=false;break}
+      }
+      if(!ok)break;
+    }
+    if(ok)return{rows,cols};
+  }
+  return null;
 }
+
 function scoreC(country,list){
-  let s=[...list].sort((a,b)=>b.p-a.p),idx=s.findIndex(c=>c.n===country.n);
-  return idx<0?5:Math.round(5+95*(idx/Math.max(s.length-1,1)))
+  let s=[...list].sort((a,b)=>b.p-a.p);
+  let idx=s.findIndex(x=>x.n===country.n);
+  return idx<0?5:Math.round(5+95*(idx/Math.max(s.length-1,1)));
 }
+
+function bestForCell(r,c){
+  let list=valid(r,c);
+  if(!list.length)return null;
+  return list.sort((a,b)=>a.p-b.p)[0];
+}
+
 function initGame(){
-  let g=genBoard();if(!g){setTimeout(initGame,50);return}
+  let g=genBoard();
+  if(!g){setTimeout(initGame,50);return}
   board={rows:g.rows,cols:g.cols,cells:Array(9).fill(null).map(()=>({c:null})),gl:12,score:0,used:new Set(),over:false};
-  sel=null;
+  sel=null;hintUsed=false;hintCellIdx=null;hintCountry=null;
   document.getElementById('iarea').classList.remove('visible');
   document.getElementById('msg').textContent='';
+  document.getElementById('hint-btn').disabled=false;
+  document.getElementById('hint-count').textContent='(1 left)';
   render();stats();
   document.getElementById('end-overlay').classList.remove('visible');
 }
+
 function el(t,c){let d=document.createElement(t);if(c)d.className=c;return d}
+
 function render(){
   const g=document.getElementById('main-grid');g.innerHTML='';
   g.appendChild(el('div','corner'));
@@ -419,13 +444,19 @@ function render(){
       }else{
         if(board.over)d.classList.add('locked');
         if(sel===idx)d.classList.add('selected');
+        if(hintCellIdx===idx&&!board.over&&hintCountry){
+          d.classList.add('hinted');
+          let ht=el('div','htext');ht.textContent='💡 Try: '+hintCountry.f+' '+hintCountry.n;d.appendChild(ht);
+        }else{
+          let p=el('span','cplus');p.textContent='+';d.appendChild(p);
+        }
         if(!board.over)d.onclick=()=>selectCell(idx);
-        let p=el('span','cplus');p.textContent='+';d.appendChild(p);
       }
       g.appendChild(d);
     }
   }
 }
+
 function stats(){
   let f=board.cells.filter(c=>c&&c.c).length;
   document.getElementById('score-val').textContent=board.score;
@@ -433,48 +464,89 @@ function stats(){
   document.getElementById('guesses-val').textContent=board.gl;
   document.getElementById('gbadge').textContent=board.gl+' guesses left';
 }
+
+function useHint(){
+  if(hintUsed||board.over)return;
+  // find hardest unfilled cell (fewest valid unused countries)
+  let bestIdx=-1,bestCount=9999;
+  for(let r=0;r<3;r++){
+    for(let c=0;c<3;c++){
+      let idx=r*3+c;
+      if(board.cells[idx]&&board.cells[idx].c)continue;
+      let vl=valid(board.rows[r],board.cols[c]).filter(x=>!board.used.has(x.n));
+      if(vl.length>0&&vl.length<bestCount){bestCount=vl.length;bestIdx=idx;}
+    }
+  }
+  if(bestIdx<0)return;
+  let r=Math.floor(bestIdx/3),c=bestIdx%3;
+  let vl=valid(board.rows[r],board.cols[c]).filter(x=>!board.used.has(x.n));
+  hintCellIdx=bestIdx;
+  hintCountry=vl.sort((a,b)=>a.p-b.p)[0]; // smallest pop = highest scoring
+  hintUsed=true;
+  document.getElementById('hint-btn').disabled=true;
+  document.getElementById('hint-count').textContent='(used)';
+  render();
+}
+
 function selectCell(idx){
   if(board.over||(board.cells[idx]&&board.cells[idx].c))return;
   sel=idx;render();
   let r=Math.floor(idx/3),c=idx%3;
-  document.getElementById('hint').innerHTML='Find a country: <strong>'+board.rows[r].lb+'</strong> AND <strong>'+board.cols[c].lb+'</strong>';
+  document.getElementById('ihint').innerHTML='Find a country: <strong>'+board.rows[r].lb+'</strong> AND <strong>'+board.cols[c].lb+'</strong>';
   document.getElementById('iarea').classList.add('visible');
   document.getElementById('search').value='';
   document.getElementById('msg').textContent='';
-  showSuggs('');document.getElementById('search').focus();
+  showSuggs('');
+  document.getElementById('search').focus();
 }
+
 function cancelSelect(){sel=null;render();document.getElementById('iarea').classList.remove('visible')}
+
 function showSuggs(q){
   const box=document.getElementById('suggs');box.innerHTML='';
   let low=q.toLowerCase();
-  let ms=C.filter(c=>!board.used.has(c.n)&&(c.n.toLowerCase().includes(low)||c.r.toLowerCase().includes(low)));
+  let ms=C.filter(c=>!board.used.has(c.n)&&c.n.toLowerCase().includes(low));
   if(!q)ms=ms.slice(0,32);else ms=ms.slice(0,20);
   for(let c of ms){let b=el('button','sug');b.textContent=c.f+' '+c.n;b.onclick=()=>guess(c);box.appendChild(b)}
 }
+
 document.getElementById('search').addEventListener('input',e=>showSuggs(e.target.value));
 document.getElementById('search').addEventListener('keydown',e=>{
-  if(e.key==='Enter'){let q=e.target.value.toLowerCase().trim(),m=C.find(c=>c.n.toLowerCase()===q&&!board.used.has(c.n));if(m)guess(m)}
+  if(e.key==='Enter'){
+    let q=e.target.value.toLowerCase().trim(),m=C.find(c=>c.n.toLowerCase()===q&&!board.used.has(c.n));
+    if(m)guess(m);
+  }
 });
+
 function guess(country){
   if(sel===null||board.over)return;
   let idx=sel,r=Math.floor(idx/3),c=idx%3,rc=board.rows[r],cc=board.cols[c];
   board.gl--;
   if(rc.t(country)&&cc.t(country)){
     let pts=scoreC(country,valid(rc,cc));
-    board.cells[idx]={c:country,pts};board.used.add(country.n);board.score+=pts;
+    board.cells[idx]={c:country,pts};
+    board.used.add(country.n);
+    board.score+=pts;
+    if(hintCellIdx===idx){hintCellIdx=null;hintCountry=null;}
     document.getElementById('msg').className='msg ok';
     document.getElementById('msg').textContent='✓ Correct! +'+pts+' points';
     sel=null;document.getElementById('iarea').classList.remove('visible');
     stats();render();
-    setTimeout(()=>{let fs=[...document.getElementById('main-grid').querySelectorAll('.cell.filled')];if(fs.length)fs[fs.length-1].classList.add('pop')},20);
+    setTimeout(()=>{
+      let fs=[...document.getElementById('main-grid').querySelectorAll('.cell.filled')];
+      if(fs.length)fs[fs.length-1].classList.add('pop');
+    },20);
   }else{
     document.getElementById('msg').className='msg err';
-    document.getElementById('msg').textContent='✗ '+country.n+' doesn\'t match both. Try again!';
+    document.getElementById('msg').textContent='✗ '+country.n+' doesn\'t match both categories. Try again!';
     stats();render();
     setTimeout(()=>{
       let fi=0;
       for(let node of document.getElementById('main-grid').children){
-        if(node.classList.contains('cell')){if(fi===idx){node.classList.add('wrong');setTimeout(()=>node.classList.remove('wrong'),400);break}fi++}
+        if(node.classList.contains('cell')){
+          if(fi===idx){node.classList.add('wrong');setTimeout(()=>node.classList.remove('wrong'),400);break}
+          fi++;
+        }
       }
     },10);
   }
@@ -482,18 +554,50 @@ function guess(country){
   if(filled===9)setTimeout(()=>endGame(true),400);
   else if(board.gl<=0)setTimeout(()=>endGame(false),400);
 }
+
+function buildAnswerGrids(){
+  const pg=document.getElementById('player-grid'),bg=document.getElementById('best-grid');
+  pg.innerHTML='';bg.innerHTML='';
+  for(let r=0;r<3;r++){
+    for(let c=0;c<3;c++){
+      let idx=r*3+c,cell=board.cells[idx],rc=board.rows[r],cc=board.cols[c];
+      let pd=el('div','ans-cell');
+      if(cell&&cell.c){
+        pd.classList.add('player');
+        let ff=el('div','ans-flag');ff.textContent=cell.c.f;pd.appendChild(ff);
+        let fn=el('div','ans-name');fn.textContent=cell.c.n;pd.appendChild(fn);
+        let fps=el('div','ans-pts p');fps.textContent=cell.pts+' pts';pd.appendChild(fps);
+      }else{
+        pd.classList.add('empty');
+        let em=el('div','ans-name');em.textContent='—';em.style.cssText='color:var(--text2);margin-top:14px';pd.appendChild(em);
+      }
+      pg.appendChild(pd);
+      let bd=el('div','ans-cell best'),best=bestForCell(rc,cc);
+      if(best){
+        let bf=el('div','ans-flag');bf.textContent=best.f;bd.appendChild(bf);
+        let bn=el('div','ans-name');bn.textContent=best.n;bd.appendChild(bn);
+        let bpts=scoreC(best,valid(rc,cc));
+        let bps=el('div','ans-pts b');bps.textContent=bpts+' pts';bd.appendChild(bps);
+      }
+      bg.appendChild(bd);
+    }
+  }
+}
+
 function endGame(won){
-  board.over=true;sel=null;
+  board.over=true;sel=null;hintCellIdx=null;
   document.getElementById('iarea').classList.remove('visible');render();
   setTimeout(()=>{
     let f=board.cells.filter(c=>c&&c.c).length;
     document.getElementById('micon').textContent=won?'🎉':'⏰';
     document.getElementById('mtitle').textContent=won?'Puzzle Complete!':'Out of Guesses!';
     document.getElementById('mscore').textContent=board.score+' pts';
-    document.getElementById('mbody').textContent='You filled '+f+'/9 cells. '+(won?'Amazing work!':'Better luck next time!');
+    document.getElementById('mbody').textContent='You filled '+f+'/9 cells.';
+    buildAnswerGrids();
     document.getElementById('end-overlay').classList.add('visible');
   },500);
 }
+
 function newGame(){initGame()}
 function showHelp(){document.getElementById('help-overlay').classList.add('visible')}
 initGame();
