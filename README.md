@@ -1,4 +1,4 @@
-# 🌍 GeoGrid — Geography Puzzle Game
+# GeoGrid — Geography Puzzle Game
 
 A daily-style geography puzzle game inspired by grid-based trivia games. Fill a 3×3 grid with countries that satisfy both the row and column category for each cell — and score points based on how obscure your picks are.
 
@@ -6,7 +6,7 @@ A daily-style geography puzzle game inspired by grid-based trivia games. Fill a 
 
 ---
 
-## 🎮 How It Works
+## How It Works
 
 The board is a 3×3 grid. Each row and column has a geographic category (e.g. *"In Scandinavia"*, *"Island nation"*, *"Flag has blue"*). Your job is to find a country that satisfies **both** the row and column category for each cell.
 
@@ -17,7 +17,7 @@ The board is a 3×3 grid. Each row and column has a geographic category (e.g. *"
 
 ---
 
-## ✨ Features
+## Features
 
 - **140+ countries** spanning every continent and region
 - **Region-based categories** — Scandinavia, Southeast Asia, the Caribbean, West Africa, the Middle East, and more
@@ -32,7 +32,7 @@ The board is a 3×3 grid. Each row and column has a geographic category (e.g. *"
 
 ---
 
-## 🛠️ Built With
+## Built With
 
 | Technology | Usage |
 |---|---|
@@ -44,7 +44,7 @@ No frameworks. No libraries. No build tools. Just a single `index.html` file.
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Play locally
 Just download `index.html` and open it in any browser — no server needed.
@@ -57,7 +57,7 @@ Just download `index.html` and open it in any browser — no server needed.
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 geogrid/
@@ -67,7 +67,7 @@ geogrid/
 
 ---
 
-## 🧠 How Scoring Works
+## How Scoring Works
 
 When you pick a correct country for a cell, it's ranked by **population** among all valid answers for that cell. The rarest pick (smallest population) scores close to **100 pts**, while the most obvious one scores as low as **5 pts**.
 
@@ -79,6 +79,6 @@ This rewards players who think beyond the first country that comes to mind.
 
 ---
 
-## 🙏 Inspiration
+## Inspiration
 
 Inspired by [GeoRiddle](https://georiddle.org/) and the broader genre of grid-based trivia games.  
